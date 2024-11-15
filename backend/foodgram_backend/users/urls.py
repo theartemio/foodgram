@@ -1,11 +1,9 @@
 from django.urls import include, path
 
-from .views import RegistrationAPIView, EmailPassTokenObtainAPIView, ChangePasswordAPIView, UsersMeAPIView
-
+from .views import AvatarAPIView
 
 urlpatterns = [
-    path("users/", RegistrationAPIView.as_view()),
-    path("auth/token/login/", EmailPassTokenObtainAPIView.as_view()),
-    path("users/set_password/", ChangePasswordAPIView.as_view()),
-    path("users/me", UsersMeAPIView.as_view())
+    path("users/me/avatar/", AvatarAPIView.as_view()),
+    path("auth/", include("djoser.urls.authtoken")),
+    path("", include("djoser.urls")),
 ]

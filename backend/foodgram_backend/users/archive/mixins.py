@@ -3,7 +3,7 @@ import re
 from rest_framework import serializers
 from django.contrib.auth import get_user_model, password_validation
 
-from .constants import USERNAME_PATTERN
+from ..constants import USERNAME_PATTERN
 from django.core.exceptions import ValidationError
 
 
@@ -23,7 +23,7 @@ class ValidateUsernameMixin:
             raise serializers.ValidationError(error_message)
         return value
 
-# Пробую его заменить
+
 class ValidatePasswordMixin:
     """Миксин для валидации пароля."""
 
