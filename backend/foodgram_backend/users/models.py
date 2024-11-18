@@ -4,7 +4,7 @@ from django.contrib.auth.models import PermissionsMixin
 
 from django.db import models
 
-from .constants import (
+from foodgram_backend.constants import (
     MAX_EMAIL_LENGTH,
     MAX_NAMES_LENGTH,
     MAX_ROLE_LENGTH,
@@ -38,7 +38,9 @@ class CustomUser(AbstractBaseUser, PermissionsMixin):
         help_text="Фамилия. Настоящая или выдуманная.",
     )
     avatar = models.ImageField(
-        upload_to="users/avatars/", null=True, default=None
+        upload_to="users/avatars/", null=True, default=None,
+        verbose_name="Аватар",
+        help_text="Аватар или, как говорили встарь, юзерпик.",
     )
     role = models.CharField(
         max_length=MAX_ROLE_LENGTH,

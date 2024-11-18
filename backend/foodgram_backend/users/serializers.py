@@ -2,7 +2,7 @@ from django.contrib.auth import get_user_model
 
 from djoser.serializers import UserSerializer
 from rest_framework import serializers
-from .fields import Base64ImageField
+from ..foodgram_backend.fields import Base64ImageField
 
 User = get_user_model()
 

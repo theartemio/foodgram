@@ -1,6 +1,9 @@
 # Maximum length for emails
 MAX_EMAIL_LENGTH = 254
 
+# Maximum length for slugs
+MAX_SLUG_LENGTH = 150
+
 # Maximum length for names of all kinds
 MAX_NAMES_LENGTH = 150
 
