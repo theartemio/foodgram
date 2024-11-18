@@ -8,6 +8,7 @@ User = get_user_model()
 
 class Tag(NameMixin, models.Model):
     """Модель для хранения тегов."""
+
     slug = models.SlugField(
         unique=True,
         max_length=MAX_SLUG_LENGTH,
@@ -22,6 +23,7 @@ class Tag(NameMixin, models.Model):
 
 class Ingredient(NameMixin, models.Model):
     """Модель для хранения ингредиентов."""
+
     measure_unit = models.CharField(
         max_length=MAX_NAMES_LENGTH,
         verbose_name="Единица измерения",
@@ -62,7 +64,7 @@ class Recipe(models.Model):
         verbose_name="Название",
         help_text="Название рецепта.",
     )
-    cover = models.ImageField(
+    image = models.ImageField(
         upload_to="recipes/covers/",
         null=True,
         default=None,
@@ -93,6 +95,7 @@ class Recipe(models.Model):
     )
     ingredients = models.ManyToManyField(
         Ingredient,
+        through="RecipeIngredient",  # Указание промежуточной модели
         help_text=(
             "Ингредиенты — продукты для приготовления блюда по рецепту.",
             " Множественное поле с выбором из предустановленного списка",
@@ -102,3 +105,31 @@ class Recipe(models.Model):
 
     def __str__(self):
         return f"{self.name}"
+
+
+class RecipeIngredient(models.Model):
+    """
+    Промежуточная модель для связи рецептов и ингредиентов.
+        - Поле recipe связано с моделью Recipe,
+        - Поле ingredient связано с моделью Ingredient,
+        - Поле value позволяет указать количество ингредиента
+    """
+
+    recipe = models.ForeignKey(
+        Recipe,
+        on_delete=models.SET_NULL,
+        null=True,
+        verbose_name="Рецепт",
+        help_text="Id рецепта, к которому относится ингредиент.",
+    )
+    ingredient = models.ForeignKey(
+        Ingredient,
+        on_delete=models.CASCADE,
+        related_name="recipes",
+        verbose_name="Ингредиент",
+        help_text="Id ингредиента.",
+    )
+    cooking_time = models.PositiveSmallIntegerField(
+        verbose_name="Количество",
+        help_text="Количество ингредиента, необходимое для рецепта.",
+    )
