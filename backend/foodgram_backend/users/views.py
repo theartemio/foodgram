@@ -84,7 +84,6 @@ class FollowViewSet(viewsets.GenericViewSet,
         """Возвращает подписки пользователя."""
         user = self.request.user
         return Follow.objects.filter(user=user)
- 
 
 
 class SubscribeViewSet(viewsets.GenericViewSet,
@@ -123,7 +122,3 @@ class SubscribeViewSet(viewsets.GenericViewSet,
         headers = self.get_success_headers(serializer.data)
         return Response(serializer.data, status=status.HTTP_201_CREATED, headers=headers)
 
-    def get_queryset(self):
-        """Возвращает подписки пользователя."""
-        user = self.request.user
-        return Follow.objects.filter(user=user)
