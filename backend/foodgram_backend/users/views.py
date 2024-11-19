@@ -1,13 +1,19 @@
 from django.contrib.auth import get_user_model
+from django.shortcuts import get_object_or_404
 from rest_framework import status
-
+from rest_framework import filters, permissions, viewsets
+from rest_framework.mixins import CreateModelMixin, ListModelMixin
 
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
 
-from .serializers import AvatarSerializer
+
+
+from .serializers import AvatarSerializer, FollowSerializer
+from .permissions import IsSameUserOrRestricted
+from .models import Follow
 
 User = get_user_model()
 
@@ -39,3 +45,43 @@ class AvatarAPIView(APIView):
             },  # Изменить ответ, должен выдавать ссылку
             status=status.HTTP_200_OK,
         )
+
+
+# Отличие от моего вьюсета в том что в ТЗ все должно делаться по ссылке
+# вида http://localhost/api/users/{id}/subscribe/ 
+# Также другой ответ API
+class FollowViewSet(viewsets.GenericViewSet,
+                    ListModelMixin,
+                    CreateModelMixin,):
+    """
+    Позволяет просматривать свои подписки и подписываться на других.
+
+    Пермишены:
+        Просмотр подписок и добавление новой подписки доступно только
+        самому пользователю.
+        Проверка осуществляется с помощью кастомного пермишена
+        IsSameUserOrRestricted.
+    Методы:
+        Вьюсет работает только с методами GET и POST.
+    Поиск:
+        Поиск настроен для поиска по точному юзернейму.
+    """
+    serializer_class = FollowSerializer
+    filter_backends = (filters.SearchFilter,)
+    search_fields = ("=following__username",)
+    permission_classes = (
+        IsAuthenticated,
+        IsSameUserOrRestricted,
+    )
+
+    def perform_create(self, serializer):
+        """Создает подписку."""
+        following_username = self.request.data.get("following")
+        following_user = get_object_or_404(User, username=following_username)
+        serializer.save(user=self.request.user, following=following_user)
+
+    def get_queryset(self):
+        """Возвращает подписки пользователя."""
+        user = self.request.user
+        return Follow.objects.filter(user=user)
+ 

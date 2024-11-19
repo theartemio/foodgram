@@ -4,6 +4,7 @@ from django.contrib.auth.models import PermissionsMixin
 
 from django.db import models
 
+
 from foodgram_backend.constants import (
     MAX_EMAIL_LENGTH,
     MAX_NAMES_LENGTH,
@@ -38,7 +39,9 @@ class CustomUser(AbstractBaseUser, PermissionsMixin):
         help_text="Фамилия. Настоящая или выдуманная.",
     )
     avatar = models.ImageField(
-        upload_to="users/avatars/", null=True, default=None,
+        upload_to="users/avatars/",
+        null=True,
+        default=None,
         verbose_name="Аватар",
         help_text="Аватар или, как говорили встарь, юзерпик.",
     )
@@ -57,3 +60,34 @@ class CustomUser(AbstractBaseUser, PermissionsMixin):
     USERNAME_FIELD = "email"
     REQUIRED_FIELDS = ["username", "first_name", "last_name"]
     objects = UserManager()
+
+
+class Follow(models.Model):
+    """
+    Модель для хранения подписок пользователей.
+    Реализует связь многие-ко-многим.
+    Каждая запись связана с моделью User:
+        - Поле user - на пользователя, которому принадлежит
+        список подписок.
+        - Поле following - на пользователя, на которого
+        подписан user.
+    """
+
+    user = models.ForeignKey(
+        CustomUser, related_name="user", on_delete=models.CASCADE
+    )
+    following = models.ForeignKey(
+        CustomUser, related_name="following", on_delete=models.CASCADE
+    )
+
+    class Meta:
+        """Проверяет что подписка не добавляется дважды."""
+
+        constraints = [
+            models.UniqueConstraint(
+                fields=["user", "following"], name="unique_follow"
+            )
+        ]
+
+    def __str__(self):
+        return f"follows"
