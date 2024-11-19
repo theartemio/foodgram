@@ -85,3 +85,45 @@ class FollowViewSet(viewsets.GenericViewSet,
         user = self.request.user
         return Follow.objects.filter(user=user)
  
+
+
+class SubscribeViewSet(viewsets.GenericViewSet,
+                    CreateModelMixin,):
+    """
+    """
+    serializer_class = FollowSerializer
+    filter_backends = (filters.SearchFilter,)
+    search_fields = ("=following__username",)
+    permission_classes = (
+        IsAuthenticated,
+        IsSameUserOrRestricted,
+    )
+
+    def get_user_id(self):
+        """Возвращает id пользователя из URL."""
+        return self.kwargs.get("user_id")
+
+    def create(self, request, *args, **kwargs):
+        following_id = self.get_user_id()
+        print(f"ID: {following_id}")
+        # serializer = self.get_serializer(data=request.data)
+        following_user = get_object_or_404(User, id=following_id)
+        following_username = following_user.username # Тут я подписываюсь по юзернейму - надо это изменить
+        data = {
+            "user": self.request.user,
+            "following": following_username,
+        }
+        serializer = self.get_serializer(data=data)
+
+        serializer.is_valid(raise_exception=True)
+        print("DATA IS VALID")
+        serializer.save(user=self.request.user, following=following_user) # Очень криво но работает
+
+        # self.perform_create(serializer)
+        headers = self.get_success_headers(serializer.data)
+        return Response(serializer.data, status=status.HTTP_201_CREATED, headers=headers)
+
+    def get_queryset(self):
+        """Возвращает подписки пользователя."""
+        user = self.request.user
+        return Follow.objects.filter(user=user)

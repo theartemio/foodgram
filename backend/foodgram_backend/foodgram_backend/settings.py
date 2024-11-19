@@ -84,7 +84,7 @@ DJOSER = {
         'user': 'users.serializers.CustomUserSerializer',
     },
     'PERMISSIONS': {
-        'user': ['users.permissions.IsSameUserOrRestricted'],
+        'user': ['users.permissions.IsSameUserOrReadOnly'],
     }
 }
 
