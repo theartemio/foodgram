@@ -47,14 +47,10 @@ class AvatarAPIView(APIView):
         )
 
 
-# Отличие от моего вьюсета в том что в ТЗ все должно делаться по ссылке
-# вида http://localhost/api/users/{id}/subscribe/ 
-# Также другой ответ API
-class FollowViewSet(viewsets.GenericViewSet,
-                    ListModelMixin,
+class SubscribeViewSet(viewsets.GenericViewSet, ListModelMixin,
                     CreateModelMixin,):
     """
-    Позволяет просматривать свои подписки и подписываться на других.
+        Позволяет просматривать свои подписки и подписываться на других.
 
     Пермишены:
         Просмотр подписок и добавление новой подписки доступно только
@@ -74,34 +70,16 @@ class FollowViewSet(viewsets.GenericViewSet,
         IsSameUserOrRestricted,
     )
 
-    def perform_create(self, serializer):
-        """Создает подписку."""
-        following_username = self.request.data.get("following")
-        following_user = get_object_or_404(User, username=following_username)
-        serializer.save(user=self.request.user, following=following_user)
-
     def get_queryset(self):
         """Возвращает подписки пользователя."""
         user = self.request.user
         return Follow.objects.filter(user=user)
 
-
-class SubscribeViewSet(viewsets.GenericViewSet,
-                    CreateModelMixin,):
-    """
-    """
-    serializer_class = FollowSerializer
-    filter_backends = (filters.SearchFilter,)
-    search_fields = ("=following__username",)
-    permission_classes = (
-        IsAuthenticated,
-        IsSameUserOrRestricted,
-    )
-
     def get_user_id(self):
         """Возвращает id пользователя из URL."""
         return self.kwargs.get("user_id")
-
+    
+    # рабочий вьюсет на create
     def create(self, request, *args, **kwargs):
         following_id = self.get_user_id()
         print(f"ID: {following_id}")
@@ -121,4 +99,5 @@ class SubscribeViewSet(viewsets.GenericViewSet,
         # self.perform_create(serializer)
         headers = self.get_success_headers(serializer.data)
         return Response(serializer.data, status=status.HTTP_201_CREATED, headers=headers)
+
 

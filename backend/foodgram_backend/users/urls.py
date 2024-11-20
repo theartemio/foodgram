@@ -1,12 +1,11 @@
 from django.urls import include, path
 
 from .views import AvatarAPIView
-from .views import FollowViewSet, SubscribeViewSet
+from .views import SubscribeViewSet
 from rest_framework.routers import DefaultRouter
 
-follows = FollowViewSet.as_view({
+follows = SubscribeViewSet.as_view({
     "get": "list",
-    "post": "create"
 })
 subscribe = SubscribeViewSet.as_view({
     "post": "create"

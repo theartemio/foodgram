@@ -126,7 +126,8 @@ class RecipeIngredient(models.Model):
         verbose_name="Ингредиент",
         help_text="Id ингредиента.",
     )
-    quantity = models.PositiveSmallIntegerField(
+    value = models.PositiveSmallIntegerField(
         verbose_name="Количество",
         help_text="Количество ингредиента, необходимое для рецепта.",
     )
+

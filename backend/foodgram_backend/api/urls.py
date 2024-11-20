@@ -12,6 +12,6 @@ router.register("ingredients", IngredientViewSet)
 router.register("recipes", RecipeViewSet)
 
 urlpatterns = [
-    path("testapi/", include(router.urls)),
+    path("", include(router.urls)),
     path("", include("users.urls")),
 ]
