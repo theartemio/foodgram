@@ -131,3 +131,31 @@ class RecipeIngredient(models.Model):
         help_text="Количество ингредиента, необходимое для рецепта.",
     )
 
+'''
+class Favorites(models.Model):
+    """Модель для избранного."""
+
+    recipe = models.ForeignKey(
+        Recipe,
+        on_delete=models.SET_NULL,
+        null=False,
+        related_name="recipe",
+        verbose_name="Рецепт",
+        help_text="Id рецепта, к которому относится ингредиент.",
+    )
+    user = models.ForeignKey(
+        User, 
+        on_delete=models.CASCADE,
+        null=False,
+        related_name="user", 
+    )
+
+    class Meta:
+        """Проверяет, что рецепт не добавляется в избранное дважды."""
+
+        constraints = [
+            models.UniqueConstraint(
+                fields=["user", "recipe"], name="unique_user_recipe"
+            )
+        ]
+'''

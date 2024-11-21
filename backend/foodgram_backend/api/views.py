@@ -2,7 +2,7 @@ from django.shortcuts import get_object_or_404
 from rest_framework import serializers
 from recipes.models import Tag, Ingredient, Recipe, RecipeIngredient
 from rest_framework.response import Response
-from .serializers import TagSerializer, IngredientSerializer, RecipeSerializer, RecipeDetailSerializer
+from .serializers import TagSerializer, IngredientSerializer, RecipeSerializer, RecipeDetailSerializer, RecipeIngredientSerializer
 from rest_framework import response, viewsets
 from rest_framework import status
 
@@ -24,8 +24,6 @@ class IngredientViewSet(SearchMixin, GetMixin, viewsets.ModelViewSet):
     serializer_class = IngredientSerializer
 
 
-# Тут нужно сделать чтобы данные возвращались в нужном формате: юзер возвращался в виде
-# объекта юзера.
 class RecipeViewSet(PaginationMixin, viewsets.ModelViewSet):
     """
     ViewSet для работы с рецептами.
@@ -49,8 +47,8 @@ class RecipeViewSet(PaginationMixin, viewsets.ModelViewSet):
             # serializer = TitleDetailSerializer(page, many=True)
             # return self.get_paginated_response(serializer.data)
         serializer = RecipeDetailSerializer(queryset, many=True)
-        return response.Response(serializer.data)
-
+        return Response(serializer.data)
+ 
     def retrieve(self, request, pk=None):
         queryset = self.get_queryset()
         recipe = get_object_or_404(queryset, pk=pk)
@@ -64,29 +62,10 @@ class RecipeViewSet(PaginationMixin, viewsets.ModelViewSet):
         serializer.is_valid(raise_exception=True)
         ingredient_list = serializer.validated_data.pop("ingredients")
         recipe = serializer.save(author=self.request.user)
-        for ingredient in ingredient_list: # Тут проверку надо сделать по сериализатору
-            
+        for ingredient in ingredient_list:
+            ingredient_serializer = RecipeIngredientSerializer(data=ingredient)
+            ingredient_serializer.is_valid(raise_exception=True)
             current_ingredient = get_object_or_404(Ingredient, id=ingredient["id"])
-
-
-            value = ingredient["value"]
-            RecipeIngredient.objects.create(
-                ingredient=current_ingredient, recipe=recipe, value=value)
-
-
-
-
-        return Response(
-                {"ok": "ok"},
-                status=status.HTTP_200_OK,
-            )
-
-    def perform_create(self, serializer):
-        """Создает рецепт, указывая отправившего запрос юзера как автора."""
-        serializer.save(author=self.request.user)
-
-'''
-    def get_queryset(self):
-        title_id = self.get_post_id()
-        return self.queryset.filter(title_id=title_id)
-'''
+            ingredient_serializer.save(ingredient=current_ingredient, recipe=recipe)
+        serializer = RecipeDetailSerializer(recipe) # Тут надо поменять - не соотвентствует ТЗ
+        return Response(serializer.data)

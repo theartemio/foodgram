@@ -4,8 +4,25 @@ from djoser.serializers import UserSerializer
 from rest_framework import serializers
 from foodgram_backend.fields import Base64ImageField
 from .models import Follow
+from recipes.models import Recipe
 
 User = get_user_model()
+
+
+# Для теста
+class RecipeSubscriptionsSerializer(serializers.ModelSerializer):
+    """Сериализатор для детального просмотра рецептов."""
+
+    image = Base64ImageField(required=False, allow_null=True)
+
+    class Meta:
+        model = Recipe
+        fields = (
+            "id",
+            "name",
+            "image",
+            "cooking_time",
+        )
 
 
 class CustomUserSerializer(UserSerializer):
@@ -26,6 +43,42 @@ class CustomUserSerializer(UserSerializer):
         ]
 
 
+class SubscriptionUserSerializer(UserSerializer):
+    """
+    Кастомный сериализатор пользователя для
+    просмотра юзера с рецептами
+    """
+
+    is_subscribed = serializers.SerializerMethodField(read_only=True)
+    recipes = RecipeSubscriptionsSerializer(read_only=True, many=True)
+    recipes_count = serializers.SerializerMethodField(read_only=True)
+
+    class Meta:
+        model = User
+        fields = [
+            "email",
+            "id",
+            "username",
+            "first_name",
+            "last_name",
+            "is_subscribed",
+            "recipes",
+            "recipes_count",
+            "avatar",
+        ]
+
+    def get_is_subscribed(self, obj):
+        user = self.context["request"].user
+        subscribed = Follow.objects.filter(user=user, following=obj).exists()
+        return subscribed
+
+    def get_recipes_count(self, obj):
+        recipes = obj.recipes
+        if recipes:
+            return recipes.count()
+        return 0
+
+
 class AvatarSerializer(serializers.ModelSerializer):
     """Сериализатор аватара, нужен для работы с полем Base64ImageField."""
 
@@ -39,10 +92,8 @@ class AvatarSerializer(serializers.ModelSerializer):
 class FollowSerializer(serializers.ModelSerializer):
     """Сериализатор для модели Follow."""
 
-    user = serializers.ReadOnlyField(source="user.username")
-    following = serializers.SlugRelatedField(
-        slug_field="username", queryset=User.objects.all()
-    )
+    user = serializers.ReadOnlyField(source="user.id")
+    following = serializers.PrimaryKeyRelatedField(queryset=User.objects.all())
 
     def validate(self, data):
         """

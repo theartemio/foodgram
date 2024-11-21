@@ -7,13 +7,12 @@ from rest_framework.mixins import CreateModelMixin, ListModelMixin
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
-
-
+from .serializers import CustomUserSerializer, SubscriptionUserSerializer
 
 
 from .serializers import AvatarSerializer, FollowSerializer
 from .permissions import IsSameUserOrRestricted
-from .models import Follow
+from .models import Follow, CustomUser
 
 User = get_user_model()
 
@@ -47,8 +46,11 @@ class AvatarAPIView(APIView):
         )
 
 
-class SubscribeViewSet(viewsets.GenericViewSet, ListModelMixin,
-                    CreateModelMixin,):
+class SubscribeViewSet(
+    viewsets.GenericViewSet,
+    ListModelMixin,
+    CreateModelMixin,
+):
     """
         Позволяет просматривать свои подписки и подписываться на других.
 
@@ -62,7 +64,8 @@ class SubscribeViewSet(viewsets.GenericViewSet, ListModelMixin,
     Поиск:
         Поиск настроен для поиска по точному юзернейму.
     """
-    serializer_class = FollowSerializer
+
+    # serializer_class = FollowSerializer
     filter_backends = (filters.SearchFilter,)
     search_fields = ("=following__username",)
     permission_classes = (
@@ -70,34 +73,34 @@ class SubscribeViewSet(viewsets.GenericViewSet, ListModelMixin,
         IsSameUserOrRestricted,
     )
 
+    def get_serializer_class(self):
+        if self.action == "list":
+            return SubscriptionUserSerializer
+        return FollowSerializer
+
     def get_queryset(self):
         """Возвращает подписки пользователя."""
         user = self.request.user
-        return Follow.objects.filter(user=user)
+        return CustomUser.objects.filter(following__user=user)
 
     def get_user_id(self):
         """Возвращает id пользователя из URL."""
         return self.kwargs.get("user_id")
-    
-    # рабочий вьюсет на create
+
     def create(self, request, *args, **kwargs):
+        """Создает подписку по переданному id"""
         following_id = self.get_user_id()
-        print(f"ID: {following_id}")
-        # serializer = self.get_serializer(data=request.data)
         following_user = get_object_or_404(User, id=following_id)
-        following_username = following_user.username # Тут я подписываюсь по юзернейму - надо это изменить
         data = {
             "user": self.request.user,
-            "following": following_username,
+            "following": following_id,
         }
         serializer = self.get_serializer(data=data)
-
         serializer.is_valid(raise_exception=True)
-        print("DATA IS VALID")
-        serializer.save(user=self.request.user, following=following_user) # Очень криво но работает
-
-        # self.perform_create(serializer)
-        headers = self.get_success_headers(serializer.data)
-        return Response(serializer.data, status=status.HTTP_201_CREATED, headers=headers)
-
-
+        serializer.save(
+            user=self.request.user, following=following_user
+        )
+        headers = self.get_success_headers(serializer.data) 
+        return Response(
+            serializer.data, status=status.HTTP_201_CREATED, headers=headers
+        )
