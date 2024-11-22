@@ -65,7 +65,6 @@ class SubscribeViewSet(
         Поиск настроен для поиска по точному юзернейму.
     """
 
-    # serializer_class = FollowSerializer
     filter_backends = (filters.SearchFilter,)
     search_fields = ("=following__username",)
     permission_classes = (
@@ -97,10 +96,8 @@ class SubscribeViewSet(
         }
         serializer = self.get_serializer(data=data)
         serializer.is_valid(raise_exception=True)
-        serializer.save(
-            user=self.request.user, following=following_user
-        )
-        headers = self.get_success_headers(serializer.data) 
+        serializer.save(user=self.request.user, following=following_user)
+        headers = self.get_success_headers(serializer.data)
         return Response(
             serializer.data, status=status.HTTP_201_CREATED, headers=headers
         )

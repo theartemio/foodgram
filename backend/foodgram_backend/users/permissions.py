@@ -45,11 +45,12 @@ class IsSameUserOrReadOnly(permissions.BasePermission):
             or obj.user == request.user
         )
 
+
 class IsSameUserOrRestricted(permissions.BasePermission):
     """Проверяет, что пользователь залогинен и запрашивает записи о себе."""
 
     def has_permission(self, request, view):
-        if request.method == 'GET' and view.action == 'list':
+        if request.method == "GET" and view.action == "list":
             return request.user.is_authenticated
         return True
 

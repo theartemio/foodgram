@@ -1,38 +1,32 @@
 from django.db import models
 from django.contrib.auth import get_user_model
 
+from .abstract_models import UserRecipeListsAbstract
+
 User = get_user_model()
 
-class ToBuy(models.Model):
-    """
-    Модель для хранения списков покупок пользователей.
-    Реализует связь многие-ко-многим и количество продукта.
-    Каждая запись связана с моделью User:
-        - Поле user - на пользователя, которому принадлежит
-        список подписок.
-        - Поле following - на пользователя, на которого
-        подписан user.
-    """
 
-    user = models.ForeignKey(
-        User, related_name="shopping_user", on_delete=models.CASCADE
-    )
-    ingredient = models.ForeignKey(
-        User, related_name="ingredient", on_delete=models.CASCADE
-    )
-    quantity = models.PositiveSmallIntegerField(
-        verbose_name="Время приготовления",
-        help_text="Время приготовления в минутах.",
-    )
+class Favorites(UserRecipeListsAbstract):
+    """Модель для хранения избранных рецептов."""
 
     class Meta:
-        """Проверяет, что ингредиент не добавляется дважды."""
+        """Проверяет, что рецепт не добавляется в избранное дважды."""
 
         constraints = [
             models.UniqueConstraint(
-                fields=["user", "ingredient"], name="unique_ingredients"
+                fields=["user", "recipe"], name="unique_user_recipe_fave"
             )
         ]
 
-    def __str__(self):
-        return f"follows"
+
+class ShoppingCart(UserRecipeListsAbstract):
+    """Модель для хранения рецептов из списка покупок."""
+
+    class Meta:
+        """Проверяет, что рецепт не добавляется в избранное дважды."""
+
+        constraints = [
+            models.UniqueConstraint(
+                fields=["user", "recipe"], name="unique_user_recipe_cart"
+            )
+        ]

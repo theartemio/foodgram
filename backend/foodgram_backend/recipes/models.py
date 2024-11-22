@@ -42,11 +42,11 @@ class Recipe(models.Model):
         - Поле tag (необязательное) связано с моделью Tag,
         у одного рецепта допускается несколько тегов,
         переданных списком.
-        - Поле author (обязательное, заполняется автоматически)
-        связано с моделью User
         - Поле ingredient, связано с моделью Ingredient
         У одного рецепта допускается несколько ингредиентов,
-        переданных списком
+        переданных списком.
+        - Поле author (обязательное, заполняется автоматически)
+        связано с моделью User.
     """
 
     author = models.ForeignKey(
@@ -74,10 +74,9 @@ class Recipe(models.Model):
         verbose_name="Описание",
         help_text="Подробное описание рецепта.",
     )
-    cooking_time = models.PositiveSmallIntegerField(  # Мб что-то типа datetime minutes
+    cooking_time = models.PositiveSmallIntegerField(
         verbose_name="Время приготовления",
         help_text="Время приготовления в минутах.",
-        # validators=(validate_year,),
     )
     tags = models.ManyToManyField(
         Tag,
@@ -92,7 +91,7 @@ class Recipe(models.Model):
     )
     ingredients = models.ManyToManyField(
         Ingredient,
-        through="RecipeIngredient",  # Указание промежуточной модели
+        through="RecipeIngredient",
         help_text=(
             "Ингредиенты — продукты для приготовления блюда по рецепту.",
             " Множественное поле с выбором из предустановленного списка",
@@ -107,9 +106,10 @@ class Recipe(models.Model):
 class RecipeIngredient(models.Model):
     """
     Промежуточная модель для связи рецептов и ингредиентов.
-        - Поле recipe связано с моделью Recipe,
-        - Поле ingredient связано с моделью Ingredient,
-        - Поле value позволяет указать количество ингредиента
+        - Поле recipe связано с моделью Recipe.
+        - Поле ingredient связано с моделью Ingredient.
+        - Поле value позволяет указать количество ингредиента,
+        необходимое для связанного рецепта.
     """
 
     recipe = models.ForeignKey(
@@ -130,32 +130,3 @@ class RecipeIngredient(models.Model):
         verbose_name="Количество",
         help_text="Количество ингредиента, необходимое для рецепта.",
     )
-
-'''
-class Favorites(models.Model):
-    """Модель для избранного."""
-
-    recipe = models.ForeignKey(
-        Recipe,
-        on_delete=models.SET_NULL,
-        null=False,
-        related_name="recipe",
-        verbose_name="Рецепт",
-        help_text="Id рецепта, к которому относится ингредиент.",
-    )
-    user = models.ForeignKey(
-        User, 
-        on_delete=models.CASCADE,
-        null=False,
-        related_name="user", 
-    )
-
-    class Meta:
-        """Проверяет, что рецепт не добавляется в избранное дважды."""
-
-        constraints = [
-            models.UniqueConstraint(
-                fields=["user", "recipe"], name="unique_user_recipe"
-            )
-        ]
-'''

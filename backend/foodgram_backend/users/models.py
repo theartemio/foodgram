@@ -88,6 +88,3 @@ class Follow(models.Model):
                 fields=["user", "following"], name="unique_follow"
             )
         ]
-
-    def __str__(self):
-        return f"follows"

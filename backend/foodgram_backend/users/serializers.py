@@ -9,7 +9,19 @@ from recipes.models import Recipe
 User = get_user_model()
 
 
-# Для теста
+class AvatarSerializer(serializers.ModelSerializer):
+    """
+    Сериализатор аватара, позволяет загрузить картинку
+    через поле Base64ImageField.
+    """
+
+    avatar = Base64ImageField(required=False, allow_null=True)
+
+    class Meta:
+        model = User
+        fields = ("avatar",)
+
+
 class RecipeSubscriptionsSerializer(serializers.ModelSerializer):
     """Сериализатор для детального просмотра рецептов."""
 
@@ -27,8 +39,8 @@ class RecipeSubscriptionsSerializer(serializers.ModelSerializer):
 
 class CustomUserSerializer(UserSerializer):
     """
-    Кастомный сериализатор пользователя для
-    эндпоинтов /api/users/me/ и /api/users/me/
+    Сериализатор пользователя для
+    эндпоинтов /api/users/me/.
     """
 
     class Meta:
@@ -46,7 +58,7 @@ class CustomUserSerializer(UserSerializer):
 class SubscriptionUserSerializer(UserSerializer):
     """
     Кастомный сериализатор пользователя для
-    просмотра юзера с рецептами
+    просмотра юзера с рецептами.
     """
 
     is_subscribed = serializers.SerializerMethodField(read_only=True)
@@ -79,16 +91,6 @@ class SubscriptionUserSerializer(UserSerializer):
         return 0
 
 
-class AvatarSerializer(serializers.ModelSerializer):
-    """Сериализатор аватара, нужен для работы с полем Base64ImageField."""
-
-    avatar = Base64ImageField(required=False, allow_null=True)
-
-    class Meta:
-        model = User
-        fields = ("avatar",)
-
-
 class FollowSerializer(serializers.ModelSerializer):
     """Сериализатор для модели Follow."""
 
@@ -105,7 +107,7 @@ class FollowSerializer(serializers.ModelSerializer):
         user = self.context["request"].user
         if data["following"] == user:
             raise serializers.ValidationError(
-                "Зачем вам подписываться на самого себя?!"
+                "Мы любим чревоугодие, а не тщеславие. Не подписывайтесь на самого себя!"
             )
         if Follow.objects.filter(
             user=user, following=data["following"]
