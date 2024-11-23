@@ -9,9 +9,18 @@ from .serializers import (
     RecipeDetailSerializer,
     RecipeIngredientSerializer,
 )
+from shoppinglist.models import ShoppingCart
+from rest_framework.decorators import (
+    api_view,
+    authentication_classes,
+    permission_classes,
+)
+from rest_framework.authentication import TokenAuthentication
+from rest_framework.permissions import IsAuthenticated
 from rest_framework import response, viewsets
 from rest_framework import status
 from django.http import HttpResponse
+from shoppinglist.models import UserIngredients
 
 from .mixins import (
     GetMixin,
@@ -56,13 +65,17 @@ class RecipeViewSet(PaginationMixin, viewsets.ModelViewSet):
         # if page is not None:
         # serializer = TitleDetailSerializer(page, many=True)
         # return self.get_paginated_response(serializer.data)
-        serializer = RecipeDetailSerializer(queryset, many=True, context={"request": request})
+        serializer = RecipeDetailSerializer(
+            queryset, many=True, context={"request": request}
+        )
         return Response(serializer.data)
 
     def retrieve(self, request, pk=None):
         queryset = self.get_queryset()
         recipe = get_object_or_404(queryset, pk=pk)
-        serializer = RecipeDetailSerializer(recipe,  context={"request": request})
+        serializer = RecipeDetailSerializer(
+            recipe, context={"request": request}
+        )
         return Response(serializer.data)
 
     def create(self, request):
@@ -86,14 +99,21 @@ class RecipeViewSet(PaginationMixin, viewsets.ModelViewSet):
         return Response(serializer.data)
 
 
-# Заготовка функции возврата файлов
+@api_view(["GET"])
+@authentication_classes([TokenAuthentication])
+@permission_classes([IsAuthenticated])
 def download_shopping_list(request):
+    """Возвращает список покупок в виде списка в формате rtf."""
     user = request.user
-
-    my_data = f"TEST STRING. WOW! IT WORKED! User: {user}"
+    users_ingredients = UserIngredients.objects.filter(user=user.id)
+    formatted_lines = [
+        f"{i.ingredient.name}, ({i.ingredient.measure_unit}) - {i.total}"
+        for i in users_ingredients
+    ]
+    response_data = "\n".join(formatted_lines)
 
     response = HttpResponse(
-        my_data,
+        response_data,
         headers={
             "Content-Type": "text/rtf",
             "Content-Disposition": 'attachment; filename="list.rtf"',
