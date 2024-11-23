@@ -6,7 +6,7 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 
 from recipes.models import Recipe
-from .utils import get_image_url
+from foodgram_backend.utils import get_image_url
 
 
 User = get_user_model()

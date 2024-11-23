@@ -6,7 +6,7 @@ from rest_framework import serializers
 from foodgram_backend.fields import Base64ImageField
 from .models import Favorites, ShoppingCart
 from recipes.models import Recipe
-from .utils import get_image_url
+from foodgram_backend.utils import get_image_url
 from .mixins import UserRecipeListsMixin
 
 

@@ -4,8 +4,9 @@ from rest_framework import serializers
 from recipes.models import Tag, Ingredient, Recipe, RecipeIngredient
 from foodgram_backend.fields import Base64ImageField
 from users.serializers import CustomUserSerializer
+from shoppinglist.models import Favorites, ShoppingCart
 
-User=get_user_model()
+User = get_user_model()
 
 
 class TagSerializer(serializers.ModelSerializer):
@@ -31,6 +32,7 @@ class IngredientSerializer(serializers.ModelSerializer):
         )
         model = Ingredient
 
+
 class RecipeIngredientSerializer(serializers.ModelSerializer):
     """Сериализатор для модели Ingredient."""
 
@@ -40,6 +42,7 @@ class RecipeIngredientSerializer(serializers.ModelSerializer):
             "value",
         )
         model = RecipeIngredient
+
 
 class RecipeSerializer(serializers.ModelSerializer):
     """Сериализатор для детального просмотра рецептов."""
@@ -68,34 +71,44 @@ class RecipeSerializer(serializers.ModelSerializer):
             "text",
             "cooking_time",
         )
-        read_only_fields = (
-            "author",
-        )
+        read_only_fields = ("author",)
+
 
 class RecipeDetailSerializer(serializers.ModelSerializer):
     """Сериализатор для детального просмотра рецептов."""
-
-
 
     ingredients = IngredientSerializer(many=True)
     tags = TagSerializer(many=True)
     author = CustomUserSerializer(read_only=True)
     image = Base64ImageField(required=False, allow_null=True)
-
+    is_favorited = serializers.SerializerMethodField(read_only=True)
+    is_in_shopping_cart = serializers.SerializerMethodField(read_only=True)
 
     class Meta:
         model = Recipe
         fields = (
             "id",
             "tags",
-            "author",            
+            "author",
             "ingredients",
-            # "is_favorited", # Проверка на связь в таблице
-            # "is_in_shopping_cart", # Проверка на нахождение в корзине
+            "is_favorited",
+            "is_in_shopping_cart",
             "name",
             "image",
             "text",
             "cooking_time",
         )
 
+    def get_is_favorited(self, obj):
+        """Проверяет, в избранном ли рецепт."""
+        user = self.context["request"].user
+        faved = Favorites.objects.filter(user=user, recipe=obj).exists()
+        return faved
 
+    def get_is_in_shopping_cart(self, obj):
+        """Проверяет, в списке покупок ли рецепт."""
+        user = self.context["request"].user
+        in_shopping_cart = ShoppingCart.objects.filter(
+            user=user, recipe=obj
+        ).exists()
+        return in_shopping_cart

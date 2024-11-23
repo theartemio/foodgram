@@ -1,10 +1,11 @@
 from django.contrib.auth import get_user_model
-
+from django.http import HttpResponse
 
 from .serializers import FavoritesSerializer, ShoppingCartSerializer
 
 
 from .mixins import ManageUserListsViewSet
+from .models import ShoppingCart
 
 User = get_user_model()
 
@@ -19,3 +20,5 @@ class ManageCartViewSet(ManageUserListsViewSet):
     """Вьюсет для работы со списком покупок"""
 
     serializer_class = ShoppingCartSerializer
+
+

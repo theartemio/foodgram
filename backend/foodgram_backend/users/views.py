@@ -7,7 +7,7 @@ from rest_framework.mixins import CreateModelMixin, ListModelMixin
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
-from .serializers import CustomUserSerializer, SubscriptionUserSerializer
+from .serializers import SubscriptionsUsersSerializer
 
 
 from .serializers import AvatarSerializer, FollowSerializer
@@ -34,14 +34,14 @@ class AvatarAPIView(APIView):
 
     def put(self, request):
         user = request.user
-        serializer = self.serializer_class(data=request.data)
+        serializer = self.serializer_class(
+            data=request.data, context={"user": request.user}
+        )
         serializer.is_valid(raise_exception=True)
         user.avatar = serializer.validated_data["avatar"]
         user.save()
         return Response(
-            {
-                "avatar": "Аватар успешно изменен!"
-            },  # Изменить ответ, должен выдавать ссылку
+            serializer.data,
             status=status.HTTP_200_OK,
         )
 
@@ -74,7 +74,7 @@ class SubscribeViewSet(
 
     def get_serializer_class(self):
         if self.action == "list":
-            return SubscriptionUserSerializer
+            return SubscriptionsUsersSerializer
         return FollowSerializer
 
     def get_queryset(self):

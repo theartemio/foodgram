@@ -2,13 +2,22 @@ from django.shortcuts import get_object_or_404
 from rest_framework import serializers
 from recipes.models import Tag, Ingredient, Recipe, RecipeIngredient
 from rest_framework.response import Response
-from .serializers import TagSerializer, IngredientSerializer, RecipeSerializer, RecipeDetailSerializer, RecipeIngredientSerializer
+from .serializers import (
+    TagSerializer,
+    IngredientSerializer,
+    RecipeSerializer,
+    RecipeDetailSerializer,
+    RecipeIngredientSerializer,
+)
 from rest_framework import response, viewsets
 from rest_framework import status
+from django.http import HttpResponse
 
-from .mixins import (GetMixin,
-                     PaginationMixin,
-                     SearchMixin)  # Для пагинации использовать класс, по умолчанию паагинации не будет
+from .mixins import (
+    GetMixin,
+    PaginationMixin,
+    SearchMixin,
+)  # Для пагинации использовать класс, по умолчанию паагинации не будет
 
 
 class TagViewSet(GetMixin, viewsets.ModelViewSet):
@@ -16,6 +25,7 @@ class TagViewSet(GetMixin, viewsets.ModelViewSet):
 
     queryset = Tag.objects.all()
     serializer_class = TagSerializer
+
 
 class IngredientViewSet(SearchMixin, GetMixin, viewsets.ModelViewSet):
     """Возвращает список ингредиентов."""
@@ -44,17 +54,16 @@ class RecipeViewSet(PaginationMixin, viewsets.ModelViewSet):
         queryset = self.filter_queryset(queryset)
         # page = self.paginate_queryset(queryset)
         # if page is not None:
-            # serializer = TitleDetailSerializer(page, many=True)
-            # return self.get_paginated_response(serializer.data)
-        serializer = RecipeDetailSerializer(queryset, many=True)
+        # serializer = TitleDetailSerializer(page, many=True)
+        # return self.get_paginated_response(serializer.data)
+        serializer = RecipeDetailSerializer(queryset, many=True, context={"request": request})
         return Response(serializer.data)
- 
+
     def retrieve(self, request, pk=None):
         queryset = self.get_queryset()
         recipe = get_object_or_404(queryset, pk=pk)
-        serializer = RecipeDetailSerializer(recipe)
-        return Response(serializer.data) 
-    
+        serializer = RecipeDetailSerializer(recipe,  context={"request": request})
+        return Response(serializer.data)
 
     def create(self, request):
         raw_data = request.data
@@ -65,7 +74,29 @@ class RecipeViewSet(PaginationMixin, viewsets.ModelViewSet):
         for ingredient in ingredient_list:
             ingredient_serializer = RecipeIngredientSerializer(data=ingredient)
             ingredient_serializer.is_valid(raise_exception=True)
-            current_ingredient = get_object_or_404(Ingredient, id=ingredient["id"])
-            ingredient_serializer.save(ingredient=current_ingredient, recipe=recipe)
-        serializer = RecipeDetailSerializer(recipe) # Тут надо поменять - не соотвентствует ТЗ
+            current_ingredient = get_object_or_404(
+                Ingredient, id=ingredient["id"]
+            )
+            ingredient_serializer.save(
+                ingredient=current_ingredient, recipe=recipe
+            )
+        serializer = RecipeDetailSerializer(
+            recipe, context={"request": request}
+        )
         return Response(serializer.data)
+
+
+# Заготовка функции возврата файлов
+def download_shopping_list(request):
+    user = request.user
+
+    my_data = f"TEST STRING. WOW! IT WORKED! User: {user}"
+
+    response = HttpResponse(
+        my_data,
+        headers={
+            "Content-Type": "text/rtf",
+            "Content-Disposition": 'attachment; filename="list.rtf"',
+        },
+    )
+    return response
