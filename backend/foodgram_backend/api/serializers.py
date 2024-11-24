@@ -35,7 +35,11 @@ class IngredientSerializer(serializers.ModelSerializer):
 
 
 class RecipeIngredientSerializer(serializers.ModelSerializer):
-    """Сериализатор для модели Ingredient."""
+    """
+    Сериализатор для модели RecipeIngredient,
+    позволяет добавлять ингредиенты и их количества
+    к рецепту.
+    """
 
     class Meta:
         fields = (
@@ -45,38 +49,16 @@ class RecipeIngredientSerializer(serializers.ModelSerializer):
         model = RecipeIngredient
 
 
-class RecipeSerializer(serializers.ModelSerializer):
-    """Сериализатор для детального просмотра рецептов."""
-
-    ingredients = serializers.ListField(required=False)
-    tags = serializers.PrimaryKeyRelatedField(
-        queryset=Tag.objects.all(),
-        many=True,
-        required=False,
-        allow_null=False,
-        allow_empty=True,
-    )
-    image = Base64ImageField(required=False, allow_null=True)
-    author = serializers.SlugRelatedField(
-        slug_field="username", read_only=True
-    )
-
-    class Meta:
-        model = Recipe
-        fields = (
-            "ingredients",
-            "author",
-            "tags",
-            "image",
-            "name",
-            "text",
-            "cooking_time",
-        )
-        read_only_fields = ("author",)
-
-
 class RecipeDetailSerializer(serializers.ModelSerializer):
-    """Сериализатор для детального просмотра рецептов."""
+    """
+    Сериализатор для детального просмотра рецептов.
+    Ингредиенты, теги и автор передаются в виде объектов.
+    Включает дополнительные поля:
+        - is_favorited - поле для проверки того,
+        добавлен ли рецепт в список избранного
+        - is_in_shopping_cart - поле для проверки того,
+        добавлен ли рецепт в список покупок
+    """
 
     ingredients = IngredientSerializer(many=True)
     tags = TagSerializer(many=True)

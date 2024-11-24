@@ -27,3 +27,4 @@ GET_POST_DELETE = ("get", "post", "delete",)
 
 # Username allowed symbols
 USERNAME_PATTERN = r"^[\w.@+-]+\Z"
+

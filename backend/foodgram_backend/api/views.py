@@ -14,7 +14,7 @@ from users.permissions import IsAdminOrReadonly, IsAuthorOrReadOnly
 from .mixins import (  # Для пагинации использовать класс, по умолчанию паагинации не будет
     GetMixin, PaginationMixin, SearchMixin)
 from .serializers import (IngredientSerializer, RecipeDetailSerializer,
-                          RecipeIngredientSerializer, RecipeSerializer,
+                          RecipeIngredientSerializer,
                           TagSerializer)
 
 
@@ -40,7 +40,6 @@ class RecipeViewSet(PaginationMixin, viewsets.ModelViewSet):
     """
 
     queryset = Recipe.objects.all()
-    serializer_class = RecipeSerializer
     http_method_names = (
         "get",
         "post",
@@ -48,6 +47,7 @@ class RecipeViewSet(PaginationMixin, viewsets.ModelViewSet):
         "delete",
     )
     permission_classes = (IsAuthorOrReadOnly,)
+    serializer_class = RecipeDetailSerializer
 
 
     def list(self, request, *args, **kwargs):
@@ -58,7 +58,7 @@ class RecipeViewSet(PaginationMixin, viewsets.ModelViewSet):
         # if page is not None:
         # serializer = TitleDetailSerializer(page, many=True)
         # return self.get_paginated_response(serializer.data)
-        serializer = RecipeDetailSerializer(
+        serializer = self.serializer_class(
             queryset, many=True, context={"request": request}
         )
         return Response(serializer.data)
@@ -66,7 +66,7 @@ class RecipeViewSet(PaginationMixin, viewsets.ModelViewSet):
     def retrieve(self, request, pk=None):
         queryset = self.get_queryset()
         recipe = get_object_or_404(queryset, pk=pk)
-        serializer = RecipeDetailSerializer(
+        serializer = self.serializer_class(
             recipe, context={"request": request}
         )
         return Response(serializer.data)
@@ -86,7 +86,7 @@ class RecipeViewSet(PaginationMixin, viewsets.ModelViewSet):
             ingredient_serializer.save(
                 ingredient=current_ingredient, recipe=recipe
             )
-        serializer = RecipeDetailSerializer(
+        serializer = self.serializer_class(
             recipe, context={"request": request}
         )
         return Response(serializer.data)
