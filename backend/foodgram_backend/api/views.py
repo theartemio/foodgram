@@ -1,32 +1,21 @@
-from django.shortcuts import get_object_or_404
-from rest_framework import serializers
-from recipes.models import Tag, Ingredient, Recipe, RecipeIngredient
-from rest_framework.response import Response
-from .serializers import (
-    TagSerializer,
-    IngredientSerializer,
-    RecipeSerializer,
-    RecipeDetailSerializer,
-    RecipeIngredientSerializer,
-)
-from shoppinglist.models import ShoppingCart
-from rest_framework.decorators import (
-    api_view,
-    authentication_classes,
-    permission_classes,
-)
-from rest_framework.authentication import TokenAuthentication
-from rest_framework.permissions import IsAuthenticated
-from rest_framework import response, viewsets
-from rest_framework import status
 from django.http import HttpResponse
-from shoppinglist.models import UserIngredients
+from django.shortcuts import get_object_or_404
+from recipes.models import Ingredient, Recipe, RecipeIngredient, Tag
+from rest_framework import response, serializers, status, viewsets
+from rest_framework.authentication import TokenAuthentication
+from rest_framework.decorators import (api_view, authentication_classes,
+                                       permission_classes)
+from rest_framework.permissions import (IsAuthenticated,
+                                        IsAuthenticatedOrReadOnly)
+from rest_framework.response import Response
+from shoppinglist.models import ShoppingCart, UserIngredients
+from users.permissions import IsAdminOrReadonly, IsAuthorOrReadOnly
 
-from .mixins import (
-    GetMixin,
-    PaginationMixin,
-    SearchMixin,
-)  # Для пагинации использовать класс, по умолчанию паагинации не будет
+from .mixins import (  # Для пагинации использовать класс, по умолчанию паагинации не будет
+    GetMixin, PaginationMixin, SearchMixin)
+from .serializers import (IngredientSerializer, RecipeDetailSerializer,
+                          RecipeIngredientSerializer, RecipeSerializer,
+                          TagSerializer)
 
 
 class TagViewSet(GetMixin, viewsets.ModelViewSet):
@@ -34,6 +23,7 @@ class TagViewSet(GetMixin, viewsets.ModelViewSet):
 
     queryset = Tag.objects.all()
     serializer_class = TagSerializer
+    permission_classes = (IsAdminOrReadonly,)
 
 
 class IngredientViewSet(SearchMixin, GetMixin, viewsets.ModelViewSet):
@@ -41,6 +31,7 @@ class IngredientViewSet(SearchMixin, GetMixin, viewsets.ModelViewSet):
 
     queryset = Ingredient.objects.all()
     serializer_class = IngredientSerializer
+    permission_classes = (IsAdminOrReadonly,)
 
 
 class RecipeViewSet(PaginationMixin, viewsets.ModelViewSet):
@@ -56,6 +47,8 @@ class RecipeViewSet(PaginationMixin, viewsets.ModelViewSet):
         "patch",
         "delete",
     )
+    permission_classes = (IsAuthorOrReadOnly,)
+
 
     def list(self, request, *args, **kwargs):
         """Выдача объектов списом по нужной форме."""

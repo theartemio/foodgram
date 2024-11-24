@@ -1,17 +1,10 @@
-from django.contrib.auth.models import AbstractBaseUser, UserManager
-
-from django.contrib.auth.models import PermissionsMixin
-
+from django.contrib.auth.models import (AbstractBaseUser, PermissionsMixin,
+                                        UserManager)
 from django.db import models
 
-
-from foodgram_backend.constants import (
-    MAX_EMAIL_LENGTH,
-    MAX_NAMES_LENGTH,
-    MAX_ROLE_LENGTH,
-    CHOICES,
-    USER,
-)
+from foodgram_backend.constants import (CHOICES, MAX_EMAIL_LENGTH,
+                                        MAX_NAMES_LENGTH, MAX_ROLE_LENGTH,
+                                        USER)
 
 
 class CustomUser(AbstractBaseUser, PermissionsMixin):

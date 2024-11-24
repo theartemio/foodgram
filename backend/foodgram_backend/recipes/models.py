@@ -1,6 +1,8 @@
-from django.db import models
-from foodgram_backend.constants import MAX_NAMES_LENGTH, MAX_SLUG_LENGTH
 from django.contrib.auth import get_user_model
+from django.db import models
+
+from foodgram_backend.constants import MAX_NAMES_LENGTH, MAX_SLUG_LENGTH
+
 from .mixins import NameMixin
 
 User = get_user_model()

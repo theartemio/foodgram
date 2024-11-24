@@ -1,44 +1,35 @@
-from django.db import models
 from django.contrib.auth import get_user_model
+from django.db import models
+from recipes.models import Ingredient
 
 from .abstract_models import UserRecipeListsAbstract
-from recipes.models import Ingredient
-from django.dispatch import receiver
-
-from django.contrib.auth import get_user_model
-
-from rest_framework import serializers, status, viewsets
-from rest_framework.mixins import CreateModelMixin
-from rest_framework.permissions import IsAuthenticated
-from rest_framework.response import Response
-
-from recipes.models import Recipe
 
 User = get_user_model()
 
 
 class Favorites(UserRecipeListsAbstract):
-    """Модель для хранения избранных рецептов."""
+    """Модель для хранения списка избранных рецептов."""
 
     class Meta:
         """Проверяет, что рецепт не добавляется в избранное дважды."""
 
         constraints = [
             models.UniqueConstraint(
-                fields=["user", "recipe"], name="unique_user_recipe_fave"
+                fields=["user", "recipe"], name="unique_user_recipe_favorite"
             )
         ]
 
 
 class ShoppingCart(UserRecipeListsAbstract):
-    """Модель для хранения рецептов из списка покупок."""
+    """Модель для хранения рецептов, сохраненных в список покупок."""
 
     class Meta:
         """Проверяет, что рецепт не добавляется в избранное дважды."""
 
         constraints = [
             models.UniqueConstraint(
-                fields=["user", "recipe"], name="unique_user_recipe_cart"
+                fields=["user", "recipe"],
+                name="unique_user_recipe_shopping_cart",
             )
         ]
 
@@ -49,6 +40,7 @@ class UserIngredients(models.Model):
     Модель обновляется каждый раз при добавлении рецепта в список
     покупок, обновление осущестляет сигнал update_shopping_cart.
     """
+
     user = models.ForeignKey(
         User,
         on_delete=models.CASCADE,
@@ -66,6 +58,7 @@ class UserIngredients(models.Model):
 
         constraints = [
             models.UniqueConstraint(
-                fields=["user", "ingredient"], name="unique_user_ingredient_cart"
+                fields=["user", "ingredient"],
+                name="unique_user_ingredient_shopping_cart",
             )
         ]

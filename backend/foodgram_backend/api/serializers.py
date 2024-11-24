@@ -1,10 +1,11 @@
-from django.shortcuts import get_object_or_404
 from django.contrib.auth import get_user_model
+from recipes.models import Ingredient, Recipe, RecipeIngredient, Tag
 from rest_framework import serializers
-from recipes.models import Tag, Ingredient, Recipe, RecipeIngredient
-from foodgram_backend.fields import Base64ImageField
-from users.serializers import CustomUserSerializer
 from shoppinglist.models import Favorites, ShoppingCart
+from shoppinglist.utils import is_in_list
+from users.serializers import CustomUserSerializer
+
+from foodgram_backend.fields import Base64ImageField
 
 User = get_user_model()
 
@@ -101,14 +102,18 @@ class RecipeDetailSerializer(serializers.ModelSerializer):
 
     def get_is_favorited(self, obj):
         """Проверяет, в избранном ли рецепт."""
-        user = self.context["request"].user
-        faved = Favorites.objects.filter(user=user, recipe=obj).exists()
-        return faved
+        is_faved = is_in_list(
+            model=Favorites,
+            user=self.context["request"].user,
+            object=obj
+        )
+        return is_faved
 
     def get_is_in_shopping_cart(self, obj):
         """Проверяет, в списке покупок ли рецепт."""
-        user = self.context["request"].user
-        in_shopping_cart = ShoppingCart.objects.filter(
-            user=user, recipe=obj
-        ).exists()
+        in_shopping_cart = is_in_list(
+            model=ShoppingCart,
+            user=self.context["request"].user,
+            object=obj,
+        )
         return in_shopping_cart

@@ -1,10 +1,10 @@
 import re
 
-from rest_framework import serializers
 from django.contrib.auth import get_user_model, password_validation
+from django.core.exceptions import ValidationError
+from rest_framework import serializers
 
 from ..constants import USERNAME_PATTERN
-from django.core.exceptions import ValidationError
 
 
 class ValidateUsernameMixin:

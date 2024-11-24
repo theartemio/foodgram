@@ -1,5 +1,5 @@
-from django.db import models
 from django.contrib.auth import get_user_model
+from django.db import models
 from recipes.models import Recipe
 
 User = get_user_model()
@@ -7,7 +7,7 @@ User = get_user_model()
 class UserRecipeListsAbstract(models.Model):
     """
     Абстрактная модель для создания M2M промежуточных моделей со списками
-    рецептов.
+    рецептов без добавления полей к модели User или Recipe.
     """
 
     recipe = models.ForeignKey(

@@ -1,20 +1,9 @@
 from rest_framework import permissions
 
-
-class IsSameUserOrRestricted(permissions.BasePermission):
-    """Проверяет, что пользователь залогинен и запрашивает записи о себе."""
-
-    def has_permission(self, request, view):
-        return True
-
-    def has_object_permission(self, request, view, obj):
-        return (
-            request.method in permissions.SAFE_METHODS
-            and request.user.is_authenticated
-        )
+from foodgram_backend.constants import ADMIN
 
 
-class IsAuthOrReadOnly(permissions.BasePermission):
+class IsAuthorOrReadOnly(permissions.BasePermission):
     """Проверяет, что пользователь залогинен и он - автор записи."""
 
     def has_permission(self, request, view):
@@ -29,6 +18,32 @@ class IsAuthOrReadOnly(permissions.BasePermission):
             or obj.author == request.user
         )
 
+class IsAdminOrReadonly(permissions.BasePermission):
+    """
+    Пермишен для админа, обеспечивает доступ для
+    изменения только админу, остальным ролям и анонимным
+    пользователям доступен просмотр
+    """
+
+    def has_permission(self, request, view):
+        return (
+            request.method in permissions.SAFE_METHODS
+            or request.user.is_authenticated
+            and request.user.role == ADMIN
+        )
+
+
+class IsSameUserOrRestricted(permissions.BasePermission):
+    """Проверяет, что пользователь залогинен и запрашивает записи о себе."""
+
+    def has_permission(self, request, view):
+        return True
+
+    def has_object_permission(self, request, view, obj):
+        return (
+            request.method in permissions.SAFE_METHODS
+            and request.user.is_authenticated
+        )
 
 class IsSameUserOrReadOnly(permissions.BasePermission):
     """Проверяет, что пользователь залогинен и он - автор записи."""

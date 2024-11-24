@@ -1,11 +1,12 @@
 from django.contrib.auth import get_user_model
-
 from djoser.serializers import UserSerializer
-from rest_framework import serializers
-from foodgram_backend.fields import Base64ImageField
-from .models import Follow
 from recipes.models import Recipe
+from rest_framework import serializers
+
+from foodgram_backend.fields import Base64ImageField
 from foodgram_backend.utils import get_image_url
+
+from .models import Follow
 
 User = get_user_model()
 
@@ -107,10 +108,16 @@ class CustomUserSerializer(UserSerializer):
         ]
 
     def get_is_subscribed(self, obj):
-        """Проверяет подписку."""
+        """Проверяет подписку. В случае анонимного пользователя возвращает False"""
+        
         user = self.context["request"].user
-        subscribed = Follow.objects.filter(user=user, following=obj).exists()
+        if user.is_anonymous:
+            return False
+        subscribed = Follow.objects.filter(
+                user=user, following=obj
+            ).exists()
         return subscribed
+
 
 class SubscriptionsUsersSerializer(UserSerializer):
     """

@@ -1,18 +1,15 @@
 from django.contrib.auth import get_user_model
 from django.shortcuts import get_object_or_404
-from rest_framework import status
-from rest_framework import filters, permissions, viewsets
+from rest_framework import filters, permissions, status, viewsets
 from rest_framework.mixins import CreateModelMixin, ListModelMixin
-
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
-from .serializers import SubscriptionsUsersSerializer
 
-
-from .serializers import AvatarSerializer, FollowSerializer
+from .models import CustomUser, Follow
 from .permissions import IsSameUserOrRestricted
-from .models import Follow, CustomUser
+from .serializers import (AvatarSerializer, FollowSerializer,
+                          SubscriptionsUsersSerializer)
 
 User = get_user_model()
 
