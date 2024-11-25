@@ -49,6 +49,35 @@ class RecipeIngredientSerializer(serializers.ModelSerializer):
         model = RecipeIngredient
 
 
+class RecipeSerializer(serializers.ModelSerializer):
+    """Сериализатор для добавления рецептов."""
+
+    ingredients = serializers.ListField(required=False)
+    tags = serializers.PrimaryKeyRelatedField(
+        queryset=Tag.objects.all(),
+        many=True,
+        required=False,
+        allow_null=False,
+        allow_empty=True,
+    )
+    image = Base64ImageField(required=False, allow_null=True)
+    author = serializers.SlugRelatedField(
+        slug_field="username", read_only=True
+    )
+
+    class Meta:
+        model = Recipe
+        fields = (
+            "ingredients",
+            "author",
+            "tags",
+            "image",
+            "name",
+            "text",
+            "cooking_time",
+        )
+        read_only_fields = ("author",)
+
 class RecipeDetailSerializer(serializers.ModelSerializer):
     """
     Сериализатор для детального просмотра рецептов.

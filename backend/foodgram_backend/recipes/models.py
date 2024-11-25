@@ -100,6 +100,15 @@ class Recipe(models.Model):
             " и с указанием количества и единицы измерения.",
         ),
     )
+    pub_date = models.DateTimeField(
+        auto_now_add=True,
+        verbose_name="Дата публикации рецепта",
+        help_text="Присваивается автоматически.",
+    )
+
+    class Meta:
+
+        ordering = ["pub_date"]
 
     def __str__(self):
         return f"{self.name}"

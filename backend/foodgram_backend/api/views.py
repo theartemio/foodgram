@@ -20,6 +20,7 @@ from .mixins import GetMixin, PaginationMixin, NoPaginationMixin, SearchMixin
 from .serializers import (
     IngredientSerializer,
     RecipeDetailSerializer,
+    RecipeSerializer,
     RecipeIngredientSerializer,
     TagSerializer,
 )
@@ -56,7 +57,7 @@ class RecipeViewSet(viewsets.ModelViewSet):
         "delete",
     )
     permission_classes = (IsAuthorOrReadOnly,)
-    serializer_class = RecipeDetailSerializer
+    serializer_class = RecipeSerializer
 
     def list(self, request, *args, **kwargs):
         """Выдача объектов списом по нужной форме."""
@@ -96,7 +97,7 @@ class RecipeViewSet(viewsets.ModelViewSet):
             ingredient_serializer.save(
                 ingredient=current_ingredient, recipe=recipe
             )
-        serializer = self.serializer_class(
+        serializer = RecipeDetailSerializer(
             recipe, context={"request": request}
         )
         return Response(serializer.data)
