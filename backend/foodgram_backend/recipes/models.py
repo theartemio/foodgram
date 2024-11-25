@@ -108,7 +108,7 @@ class Recipe(models.Model):
 
     class Meta:
 
-        ordering = ["pub_date"]
+        ordering = ["-pub_date"]
 
     def __str__(self):
         return f"{self.name}"
@@ -137,7 +137,7 @@ class RecipeIngredient(models.Model):
         verbose_name="Ингредиент",
         help_text="Id ингредиента.",
     )
-    value = models.PositiveSmallIntegerField(
+    amount = models.PositiveSmallIntegerField(
         verbose_name="Количество",
         help_text="Количество ингредиента, необходимое для рецепта.",
     )

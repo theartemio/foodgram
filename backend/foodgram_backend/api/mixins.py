@@ -2,7 +2,7 @@ from rest_framework import filters, response, status
 from rest_framework.pagination import LimitOffsetPagination
 
 # from users.permissions import IsAdminOrReadonly, IsAuthOrReadOnly
-from foodgram_backend.constants import GET_POST_DELETE
+from foodgram_backend.constants import GET_POST_DELETE, GET
 
 
 class NoPaginationMixin:
@@ -31,11 +31,13 @@ class AdminOrReadOnlyMixin:
 class GetMixin:
     """Миксин для ограничения методов."""
 
-    http_method_names = GET_POST_DELETE
-    # http_method_names = ("get",)
+    http_method_names = GET
 
-    def retrieve(self, request, *args, **kwargs):
+    def create(self, request, *args, **kwargs):
         return response.Response(status=status.HTTP_405_METHOD_NOT_ALLOWED)
+
+
+
 
 
 class SearchMixin:

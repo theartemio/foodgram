@@ -90,7 +90,6 @@ class ManageUserListsViewSet(
         queryset = self.get_queryset()
         instance = queryset.get(user=user, recipe_id=recipe_id)
         instance.delete()
-        # headers = self.get_success_headers(serializer.data)
         return Response(
             {
                 "detail": "Страница не найдена."

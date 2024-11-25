@@ -22,8 +22,10 @@ CHOICES = (
     (ADMIN, ADMIN),
 )
 
-# Tuple of methods for limiting viewsets
+# Tuples of methods for limiting viewsets
 GET_POST_DELETE = ("get", "post", "delete",)
+
+GET = ("get",)
 
 # Username allowed symbols
 USERNAME_PATTERN = r"^[\w.@+-]+\Z"

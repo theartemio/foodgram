@@ -44,12 +44,12 @@ class RecipeIngredientSerializer(serializers.ModelSerializer):
     class Meta:
         fields = (
             "id",
-            "value",
+            "amount",
         )
         model = RecipeIngredient
 
 
-class RecipeSerializer(serializers.ModelSerializer):
+class RecipeAddingSerializer(serializers.ModelSerializer):
     """Сериализатор для добавления рецептов."""
 
     ingredients = serializers.ListField(required=False)
@@ -77,6 +77,7 @@ class RecipeSerializer(serializers.ModelSerializer):
             "cooking_time",
         )
         read_only_fields = ("author",)
+
 
 class RecipeDetailSerializer(serializers.ModelSerializer):
     """
@@ -114,9 +115,7 @@ class RecipeDetailSerializer(serializers.ModelSerializer):
     def get_is_favorited(self, obj):
         """Проверяет, в избранном ли рецепт."""
         is_faved = is_in_list(
-            model=Favorites,
-            user=self.context["request"].user,
-            object=obj
+            model=Favorites, user=self.context["request"].user, object=obj
         )
         return is_faved
 

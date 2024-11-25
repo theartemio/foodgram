@@ -30,15 +30,15 @@ def upgrade_ingredient_list(ingredients, user, adding=True):
 
     for ingredient in ingredients:
         ingredient_id = ingredient["id"]
-        ingredient_value = (
-            ingredient["value"] if adding else (-ingredient["value"])
+        ingredient_amount = (
+            ingredient["amount"] if adding else (-ingredient["amount"])
         )
         ingredient_in_list = UserIngredients.objects.filter(
             ingredient_id=ingredient_id
         ).first()
         if ingredient_in_list:
             current_total = ingredient_in_list.total
-            updated_total = current_total + ingredient_value
+            updated_total = current_total + ingredient_amount
             if updated_total == 0:
                 UserIngredients.objects.get(ingredient_id=ingredient_id).delete()
             else:
@@ -48,5 +48,5 @@ def upgrade_ingredient_list(ingredients, user, adding=True):
             UserIngredients.objects.create(
                 user=user,
                 ingredient_id=ingredient_id,
-                total=ingredient_value,
+                total=ingredient_amount,
             )

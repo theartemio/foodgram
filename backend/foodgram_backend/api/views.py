@@ -13,6 +13,7 @@ from rest_framework.permissions import (
     IsAuthenticatedOrReadOnly,
 )
 from rest_framework.response import Response
+from rest_framework.mixins import RetrieveModelMixin, ListModelMixin
 from shoppinglist.models import ShoppingCart, UserIngredients
 from users.permissions import IsAdminOrReadonly, IsAuthorOrReadOnly
 
@@ -20,28 +21,35 @@ from .mixins import GetMixin, PaginationMixin, NoPaginationMixin, SearchMixin
 from .serializers import (
     IngredientSerializer,
     RecipeDetailSerializer,
-    RecipeSerializer,
+    RecipeAddingSerializer,
     RecipeIngredientSerializer,
     TagSerializer,
 )
 
 
-class TagViewSet(NoPaginationMixin, GetMixin, viewsets.ModelViewSet):
-    """Возвращает список тэгов."""
+class TagViewSet(
+    NoPaginationMixin,
+    RetrieveModelMixin,
+    ListModelMixin,
+    viewsets.GenericViewSet,
+):
+    """Возвращает список тегов."""
 
     queryset = Tag.objects.all()
     serializer_class = TagSerializer
-    permission_classes = (IsAdminOrReadonly,)
 
 
 class IngredientViewSet(
-    SearchMixin, NoPaginationMixin, GetMixin, viewsets.ModelViewSet
+    SearchMixin,
+    NoPaginationMixin,
+    RetrieveModelMixin,
+    ListModelMixin,
+    viewsets.GenericViewSet,
 ):
     """Возвращает список ингредиентов."""
 
     queryset = Ingredient.objects.all()
     serializer_class = IngredientSerializer
-    permission_classes = (IsAdminOrReadonly,)
 
 
 class RecipeViewSet(viewsets.ModelViewSet):
@@ -57,7 +65,7 @@ class RecipeViewSet(viewsets.ModelViewSet):
         "delete",
     )
     permission_classes = (IsAuthorOrReadOnly,)
-    serializer_class = RecipeSerializer
+    serializer_class = RecipeAddingSerializer
 
     def list(self, request, *args, **kwargs):
         """Выдача объектов списом по нужной форме."""
@@ -65,11 +73,11 @@ class RecipeViewSet(viewsets.ModelViewSet):
         queryset = self.filter_queryset(queryset)
         page = self.paginate_queryset(queryset)
         if page is not None:
-            serializer = self.serializer_class(
+            serializer = RecipeDetailSerializer(
                 queryset, many=True, context={"request": request}
             )
             return self.get_paginated_response(serializer.data)
-        serializer = self.serializer_class(
+        serializer = RecipeDetailSerializer(
             queryset, many=True, context={"request": request}
         )
         return Response(serializer.data)
@@ -77,7 +85,7 @@ class RecipeViewSet(viewsets.ModelViewSet):
     def retrieve(self, request, pk=None):
         queryset = self.get_queryset()
         recipe = get_object_or_404(queryset, pk=pk)
-        serializer = self.serializer_class(
+        serializer = RecipeDetailSerializer(
             recipe, context={"request": request}
         )
         return Response(serializer.data)

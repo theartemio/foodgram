@@ -2,7 +2,7 @@ from django.contrib.auth import get_user_model
 from django.db.models.signals import post_save, post_delete
 from django.dispatch import receiver
 
-from foodgram_backend.utils import get_ingredients_with_values
+from foodgram_backend.utils import get_ingredients_with_amounts
 
 from .models import ShoppingCart
 from .utils import upgrade_ingredient_list
@@ -19,7 +19,7 @@ def add_to_ingredient_list(sender, instance, created, **kwargs):
     if created:
         user = instance.user
         recipe_id = instance.recipe.id
-        ingredients = get_ingredients_with_values(recipe_id)
+        ingredients = get_ingredients_with_amounts(recipe_id)
         if ingredients:
             upgrade_ingredient_list(
                 ingredients=ingredients, user=user, adding=True
@@ -34,7 +34,7 @@ def remove_from_ingredient_list(sender, instance, **kwargs):
     """
     user = instance.user
     recipe_id = instance.recipe.id
-    ingredients = get_ingredients_with_values(recipe_id)
+    ingredients = get_ingredients_with_amounts(recipe_id)
     if ingredients:
         upgrade_ingredient_list(
             ingredients=ingredients, user=user, adding=False
