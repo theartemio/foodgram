@@ -5,6 +5,11 @@ from rest_framework.pagination import LimitOffsetPagination
 from foodgram_backend.constants import GET_POST_DELETE
 
 
+class NoPaginationMixin:
+    """Миксин отключения пагинации."""
+
+    pagination_class = None
+
 class PaginationMixin:
     """Миксин для настройки пагинации."""
 

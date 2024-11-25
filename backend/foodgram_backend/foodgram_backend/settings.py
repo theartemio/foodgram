@@ -33,7 +33,8 @@ INSTALLED_APPS = [
     'api.apps.ApiConfig',
     'users.apps.UsersConfig',
     'recipes.apps.RecipesConfig',
-    'shoppinglist.apps.ShoppinglistConfig'
+    'shoppinglist.apps.ShoppinglistConfig',
+    'shortener'
 ]
 
 MIDDLEWARE = [
@@ -72,7 +73,8 @@ REST_FRAMEWORK = {
     'DEFAULT_PERMISSION_CLASSES': [
         'rest_framework.permissions.IsAuthenticated',
     ],
-
+    'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.PageNumberPagination',
+    'PAGE_SIZE': 5,
 }
 
 # Djoser settings
@@ -82,8 +84,10 @@ DJOSER = {
         'user': 'users.serializers.CustomUserSerializer',
     },
     'PERMISSIONS': {
-        'user': ['users.permissions.IsSameUserOrReadOnly'],
-    }
+        'user': ['users.permissions.IsSameUserOrAdmin'],
+        'user_list': ['users.permissions.IsSameUserOrAdmin'],
+    },
+    'HIDE_USERS': False
 }
 
 WSGI_APPLICATION = 'foodgram_backend.wsgi.application'
@@ -157,3 +161,6 @@ STATIC_URL = '/static/'
 # https://docs.djangoproject.com/en/3.2/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+# Shortener settings
+SHORTENER_ENABLE_TEST_PATH = True

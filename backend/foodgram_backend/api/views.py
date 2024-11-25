@@ -1,24 +1,31 @@
 from django.http import HttpResponse
 from django.shortcuts import get_object_or_404
 from recipes.models import Ingredient, Recipe, RecipeIngredient, Tag
-from rest_framework import response, serializers, status, viewsets
+from rest_framework import serializers, status, viewsets
 from rest_framework.authentication import TokenAuthentication
-from rest_framework.decorators import (api_view, authentication_classes,
-                                       permission_classes)
-from rest_framework.permissions import (IsAuthenticated,
-                                        IsAuthenticatedOrReadOnly)
+from rest_framework.decorators import (
+    api_view,
+    authentication_classes,
+    permission_classes,
+)
+from rest_framework.permissions import (
+    IsAuthenticated,
+    IsAuthenticatedOrReadOnly,
+)
 from rest_framework.response import Response
 from shoppinglist.models import ShoppingCart, UserIngredients
 from users.permissions import IsAdminOrReadonly, IsAuthorOrReadOnly
 
-from .mixins import (  # Для пагинации использовать класс, по умолчанию паагинации не будет
-    GetMixin, PaginationMixin, SearchMixin)
-from .serializers import (IngredientSerializer, RecipeDetailSerializer,
-                          RecipeIngredientSerializer,
-                          TagSerializer)
+from .mixins import GetMixin, PaginationMixin, NoPaginationMixin, SearchMixin
+from .serializers import (
+    IngredientSerializer,
+    RecipeDetailSerializer,
+    RecipeIngredientSerializer,
+    TagSerializer,
+)
 
 
-class TagViewSet(GetMixin, viewsets.ModelViewSet):
+class TagViewSet(NoPaginationMixin, GetMixin, viewsets.ModelViewSet):
     """Возвращает список тэгов."""
 
     queryset = Tag.objects.all()
@@ -26,7 +33,9 @@ class TagViewSet(GetMixin, viewsets.ModelViewSet):
     permission_classes = (IsAdminOrReadonly,)
 
 
-class IngredientViewSet(SearchMixin, GetMixin, viewsets.ModelViewSet):
+class IngredientViewSet(
+    SearchMixin, NoPaginationMixin, GetMixin, viewsets.ModelViewSet
+):
     """Возвращает список ингредиентов."""
 
     queryset = Ingredient.objects.all()
@@ -34,7 +43,7 @@ class IngredientViewSet(SearchMixin, GetMixin, viewsets.ModelViewSet):
     permission_classes = (IsAdminOrReadonly,)
 
 
-class RecipeViewSet(PaginationMixin, viewsets.ModelViewSet):
+class RecipeViewSet(viewsets.ModelViewSet):
     """
     ViewSet для работы с рецептами.
     """
@@ -49,15 +58,16 @@ class RecipeViewSet(PaginationMixin, viewsets.ModelViewSet):
     permission_classes = (IsAuthorOrReadOnly,)
     serializer_class = RecipeDetailSerializer
 
-
     def list(self, request, *args, **kwargs):
         """Выдача объектов списом по нужной форме."""
         queryset = self.get_queryset()
         queryset = self.filter_queryset(queryset)
-        # page = self.paginate_queryset(queryset)
-        # if page is not None:
-        # serializer = TitleDetailSerializer(page, many=True)
-        # return self.get_paginated_response(serializer.data)
+        page = self.paginate_queryset(queryset)
+        if page is not None:
+            serializer = self.serializer_class(
+                queryset, many=True, context={"request": request}
+            )
+            return self.get_paginated_response(serializer.data)
         serializer = self.serializer_class(
             queryset, many=True, context={"request": request}
         )

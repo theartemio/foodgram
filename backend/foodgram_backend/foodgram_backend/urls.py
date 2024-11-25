@@ -6,6 +6,7 @@ from django.urls import include, path
 urlpatterns = [
     path("api/", include("api.urls")),
     path('admin/', admin.site.urls),
+    path('s/', include('shortener.urls')),
 ]
 
 if settings.DEBUG:
