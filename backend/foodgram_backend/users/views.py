@@ -5,17 +5,27 @@ from rest_framework.mixins import CreateModelMixin, ListModelMixin
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
+from django.http import Http404
 
-from .models import CustomUser
+from .models import CustomUser, Follow
 from .permissions import IsSameUserOrRestricted
 from .serializers import (
     AvatarSerializer,
     FollowSerializer,
     SubscriptionsUsersSerializer,
 )
+from djoser.views import UserViewSet
 
 User = get_user_model()
 
+class CustomUserViewSet(UserViewSet):
+    def me(self, request, *args, **kwargs):
+        if not request.user.is_authenticated:
+            return Response(
+                {"detail": "Вход не выполнен!"},
+                status=status.HTTP_401_UNAUTHORIZED,
+            )
+        return super().me(request, *args, **kwargs)
 
 class AvatarAPIView(APIView):
     """
@@ -105,6 +115,30 @@ class SubscribeViewSet(
         serializer.is_valid(raise_exception=True)
         serializer.save(user=self.request.user, following=following_user)
         headers = self.get_success_headers(serializer.data)
+        user_serializer = SubscriptionsUsersSerializer(
+            following_user, context={"request": request}
+        )
         return Response(
-            serializer.data, status=status.HTTP_201_CREATED, headers=headers
+            user_serializer.data,
+            status=status.HTTP_201_CREATED,
+            headers=headers,
+        )
+
+    def destroy(self, request, *args, **kwargs):
+        """Удаляет подписку из списка по переданному id"""
+        following_id = self.get_user_id()
+        user_id = self.request.user.id
+        try:
+            instance = get_object_or_404(
+                Follow, user=user_id, following_id=following_id
+            )
+        except Http404:
+            return Response(
+                {"error": "Такой подписки не существует!"},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+        instance.delete()
+        return Response(
+            {"detail": "Подписка удалена."},
+            status=status.HTTP_204_NO_CONTENT,
         )

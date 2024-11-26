@@ -4,10 +4,12 @@ from rest_framework import serializers, status, viewsets
 from rest_framework.mixins import CreateModelMixin
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
+from django.http import Http404
+from django.shortcuts import get_object_or_404
 
-from foodgram_backend.utils import get_image_url
 
 User = get_user_model()
+
 
 class ManageUserListsViewSet(
     viewsets.GenericViewSet,
@@ -16,7 +18,7 @@ class ManageUserListsViewSet(
     """
     Миксин для вьюсетов для работы со списками, такими как
     избранное или список покупок.
-    Позволяет добавлять рецепт в список по переданному в 
+    Позволяет добавлять рецепт в список по переданному в
     URL id.
     """
 
@@ -47,11 +49,17 @@ class ManageUserListsViewSet(
         recipe_id = self.get_recipe_id()
         user = self.request.user.id
         queryset = self.get_queryset()
-        instance = queryset.get(user=user, recipe_id=recipe_id)
+        try:
+            instance = get_object_or_404(
+                queryset, user=user, recipe_id=recipe_id
+            )
+        except Http404:
+            return Response(
+                {"error": "Такого рецепта в списке нет!"},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
         instance.delete()
         return Response(
-            {
-                "detail": "Страница не найдена."
-            }, status=status.HTTP_404_NOT_FOUND
+            {"detail": "Рецепт удален из списка."},
+            status=status.HTTP_204_NO_CONTENT,
         )
-

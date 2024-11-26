@@ -4,8 +4,10 @@ from rest_framework import serializers
 from shoppinglist.models import Favorites, ShoppingCart
 from foodgram_backend.utils import is_in_list
 from users.serializers import CustomUserSerializer
+from django.shortcuts import get_object_or_404
 
 from foodgram_backend.fields import Base64ImageField
+from django.http import Http404
 
 from foodgram_backend.constants import MAX_NAMES_LENGTH
 
@@ -43,8 +45,7 @@ class RecipeIngredientSerializer(serializers.ModelSerializer):
     к рецепту.
     """
 
-    # id = serializers.PrimaryKeyRelatedField(queryset=Ingredient.objects.all()) # Может не работать
-    # recipe = serializers.PrimaryKeyRelatedField(queryset=Recipe.objects.all()) # Может не работать
+    id = serializers.PrimaryKeyRelatedField(queryset=Ingredient.objects.all())
 
     class Meta:
         fields = (
@@ -52,8 +53,6 @@ class RecipeIngredientSerializer(serializers.ModelSerializer):
             "amount",
         )
         model = RecipeIngredient
-  
-
 
 
 class RecipeAddingSerializer(serializers.ModelSerializer):
@@ -88,15 +87,24 @@ class RecipeAddingSerializer(serializers.ModelSerializer):
         read_only_fields = ("author",)
 
     def validate_ingredients(self, value):
-        
+        if not value:
+            raise serializers.ValidationError(
+                "Список ингредиентов не может быть пустым!"
+            )
         keys = []
         for ingredient in value:
             id = ingredient["id"]
+            try:
+                ingredient = Ingredient.objects.get(id=id)
+            except Ingredient.DoesNotExist:
+                raise serializers.ValidationError("Ингредиент не найден!")
             keys.append(id)
         if len(keys) != len(set(keys)):
-            raise serializers.ValidationError("Ингредиенты не могут повторяться!")
+            raise serializers.ValidationError(
+                "Ингредиенты не могут повторяться!"
+            )
         return value
-    
+
     def validate_tags(self, value):
 
         unique_tags = set(value)

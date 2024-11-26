@@ -60,7 +60,7 @@ class IngredientViewSet(
     ListModelMixin,
     viewsets.GenericViewSet,
 ):
-    """Возвращает список ингредиентов."""
+    """ViewSet для работы с ингредиентами."""
 
     queryset = Ingredient.objects.all()
     serializer_class = IngredientSerializer
@@ -88,13 +88,13 @@ class RecipeViewSet(
     ordering_fields = ("-pub_date",)
 
     def list(self, request, *args, **kwargs):
-        """Выдача объектов списом по нужной форме."""
+        """Выдача объектов списком по нужной форме."""
         queryset = self.get_queryset()
         queryset = self.filter_queryset(queryset)
         page = self.paginate_queryset(queryset)
         if page is not None:
             serializer = RecipeDetailSerializer(
-                queryset, many=True, context={"request": request}
+                page, many=True, context={"request": request}
             )
             return self.get_paginated_response(serializer.data)
         serializer = RecipeDetailSerializer(
@@ -115,14 +115,11 @@ class RecipeViewSet(
         serializer = self.serializer_class(data=raw_data)
         serializer.is_valid(raise_exception=True)
         ingredient_list = serializer.validated_data.pop("ingredients")
-        recipe = serializer.save(author=self.request.user)
+        
+        # Тут нужно чтобы сериализатор проверял ингредиенты. Иначе сохраняется рецепт без них
 
-        if not ingredient_list:
-            return Response(
-                {"ingredients": "Список ингредиентов не может быть пустым!"},
-                status=status.HTTP_400_BAD_REQUEST,
-            )
-        # Вынести в функцию
+        recipe = serializer.save(author=self.request.user)
+        # Хочу вынести
         for ingredient in ingredient_list:
             ingredient_serializer = RecipeIngredientSerializer(data=ingredient)
             ingredient_serializer.is_valid(raise_exception=True)
@@ -135,7 +132,6 @@ class RecipeViewSet(
                     {"error": "Ингредиент не найден!"},
                     status=status.HTTP_400_BAD_REQUEST,
                 )
-
             ingredient_serializer.save(
                 ingredient=current_ingredient, recipe=recipe
             )
@@ -153,28 +149,38 @@ class RecipeViewSet(
         )
         serializer.is_valid(raise_exception=True)
 
+
+
+        if "ingredients" not in serializer.validated_data.keys():
+                return Response(
+                    {"error": "Поле ингредиенты обязательно!"},
+                    status=status.HTTP_400_BAD_REQUEST,
+                )
+        if "tags" not in serializer.validated_data.keys():
+                return Response(
+                    {"error": "Поле ингредиенты обязательно!"},
+                    status=status.HTTP_400_BAD_REQUEST,
+                )
+        ingredient_list = serializer.validated_data.pop("ingredients")
         recipe = serializer.save(author=self.request.user)
-
-        if "ingredients" in serializer.validated_data.keys():
-            ingredient_list = serializer.validated_data.pop("ingredients")
-            for ingredient in ingredient_list:
-                ingredient_serializer = RecipeIngredientSerializer(
-                    data=ingredient
+        for ingredient in ingredient_list:
+            ingredient_serializer = RecipeIngredientSerializer(
+                data=ingredient
+            )
+            ingredient_serializer.is_valid(raise_exception=True)
+            try:
+                current_ingredient = get_object_or_404(
+                    Ingredient, id=ingredient["id"]
                 )
-                ingredient_serializer.is_valid(raise_exception=True)
-                try:
-                    current_ingredient = get_object_or_404(
-                        Ingredient, id=ingredient["id"]
-                    )
-                except Http404:
-                    return Response(
-                        {"error": "Ингредиент не найден!"},
-                        status=status.HTTP_400_BAD_REQUEST,
-                    )
-
-                ingredient_serializer.save(
-                    ingredient=current_ingredient, recipe=recipe
+            except Http404:
+                return Response(
+                    {"error": "Ингредиент не найден!"},
+                    status=status.HTTP_400_BAD_REQUEST,
                 )
+
+            ingredient_serializer.save(
+                ingredient=current_ingredient, recipe=recipe
+            )
 
         self.perform_update(serializer)
         serializer = RecipeDetailSerializer(
