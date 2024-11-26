@@ -1,6 +1,6 @@
 from rest_framework import serializers
 
-from .mixins import UserRecipeListsMixin
+from .serializer_mixins import UserRecipeListsMixin
 from .models import Favorites, ShoppingCart
 
 

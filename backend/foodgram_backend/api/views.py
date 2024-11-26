@@ -23,9 +23,10 @@ from rest_framework.mixins import (
 from shoppinglist.models import ShoppingCart, UserIngredients
 from users.permissions import IsAdminOrReadonly, IsAuthorOrReadOnly
 from django.http import Http404
+from django_filters.rest_framework import DjangoFilterBackend
 
 
-from .mixins import NoPaginationMixin, SearchMixin, SearchAndFilterMixin
+from .mixins import NoPaginationMixin, SearchMixin
 from .serializers import (
     IngredientSerializer,
     RecipeDetailSerializer,
@@ -33,6 +34,7 @@ from .serializers import (
     RecipeIngredientSerializer,
     TagSerializer,
 )
+from .filtersets import RecipeFilter
 
 
 class TagViewSet(
@@ -65,7 +67,9 @@ class IngredientViewSet(
     permission_classes = (AllowAny,)
 
 
-class RecipeViewSet(viewsets.ModelViewSet, SearchAndFilterMixin):
+class RecipeViewSet(
+    viewsets.ModelViewSet,
+):
     """
     ViewSet для работы с рецептами.
     """
@@ -79,6 +83,8 @@ class RecipeViewSet(viewsets.ModelViewSet, SearchAndFilterMixin):
     )
     permission_classes = (IsAuthorOrReadOnly,)
     serializer_class = RecipeAddingSerializer
+    filter_backends = (DjangoFilterBackend,)
+    filterset_class = RecipeFilter
     ordering_fields = ("-pub_date",)
 
     def list(self, request, *args, **kwargs):

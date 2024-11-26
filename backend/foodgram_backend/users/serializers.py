@@ -1,6 +1,5 @@
 from django.contrib.auth import get_user_model
 from djoser.serializers import UserSerializer
-from recipes.models import Recipe
 from rest_framework import serializers
 
 from foodgram_backend.fields import Base64ImageField
@@ -10,83 +9,9 @@ from .models import Follow
 from .mixins import ValidateUsernameMixin
 
 from djoser.serializers import UserCreateSerializer
+from recipes.serializers import RecipeSubscriptionsSerializer
 
 User = get_user_model()
-
-
-class AvatarSerializer(serializers.ModelSerializer):
-    """
-    Сериализатор для загрузки аватара, позволяет загрузить картинку
-    через поле Base64ImageField.
-    """
-
-    avatar = Base64ImageField(required=True, allow_null=True)
-
-    class Meta:
-        model = User
-        fields = ("avatar",)
-
-    def to_representation(self, instance):
-        """
-        Возвращает ссылку на аватар.
-        """
-
-        user = self.context["user"]
-        image_url = get_image_url(user.avatar)
-        data = {
-            "avatar": image_url,
-        }
-        return data
-
-
-# Перенести в подобающее место #
-class RecipeSubscriptionsSerializer(serializers.ModelSerializer):
-    """Сериализатор для детального просмотра рецептов."""
-
-    image = Base64ImageField(required=False, allow_null=True)
-
-    class Meta:
-        model = Recipe
-        fields = (
-            "id",
-            "name",
-            "image",
-            "cooking_time",
-        )
-
-
-class FollowSerializer(serializers.ModelSerializer):
-    """Сериализатор для добавления подписки в модель Follow."""
-
-    user = serializers.ReadOnlyField(source="user.id")
-    following = serializers.PrimaryKeyRelatedField(queryset=User.objects.all())
-
-    def validate(self, data):
-        """
-        Проверяет что:
-            - Пользователь не пытается подписаться на самого себя.
-            - Пользователь не пытается подписаться на другого пользователя
-            повторно.
-        """
-        user = self.context["request"].user
-        if data["following"] == user:
-            raise serializers.ValidationError(
-                "Мы любим чревоугодие, а не тщеславие. Не подписывайтесь на самого себя!"
-            )
-        if Follow.objects.filter(
-            user=user, following=data["following"]
-        ).exists():
-            raise serializers.ValidationError(
-                "Вы уже подписаны на этого автора."
-            )
-        return data
-
-    class Meta:
-        fields = (
-            "user",
-            "following",
-        )
-        model = Follow
 
 
 class CustomUserCreateSerializer(ValidateUsernameMixin, UserCreateSerializer):
@@ -166,3 +91,62 @@ class SubscriptionsUsersSerializer(UserSerializer):
         if recipes:
             return recipes.count()
         return 0
+
+
+class AvatarSerializer(serializers.ModelSerializer):
+    """
+    Сериализатор для загрузки аватара, позволяет загрузить картинку
+    через поле Base64ImageField.
+    """
+
+    avatar = Base64ImageField(required=True, allow_null=True)
+
+    class Meta:
+        model = User
+        fields = ("avatar",)
+
+    def to_representation(self, instance):
+        """
+        Возвращает ссылку на аватар.
+        """
+
+        user = self.context["user"]
+        image_url = get_image_url(user.avatar)
+        data = {
+            "avatar": image_url,
+        }
+        return data
+
+
+class FollowSerializer(serializers.ModelSerializer):
+    """Сериализатор для добавления подписки в модель Follow."""
+
+    user = serializers.ReadOnlyField(source="user.id")
+    following = serializers.PrimaryKeyRelatedField(queryset=User.objects.all())
+
+    def validate(self, data):
+        """
+        Проверяет что:
+            - Пользователь не пытается подписаться на самого себя.
+            - Пользователь не пытается подписаться на другого пользователя
+            повторно.
+        """
+        user = self.context["request"].user
+        if data["following"] == user:
+            raise serializers.ValidationError(
+                "Мы любим чревоугодие, а не тщеславие. Не подписывайтесь на самого себя!"
+            )
+        if Follow.objects.filter(
+            user=user, following=data["following"]
+        ).exists():
+            raise serializers.ValidationError(
+                "Вы уже подписаны на этого автора."
+            )
+        return data
+
+    class Meta:
+        fields = (
+            "user",
+            "following",
+        )
+        model = Follow

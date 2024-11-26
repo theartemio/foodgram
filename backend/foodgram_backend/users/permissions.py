@@ -45,7 +45,7 @@ class IsSameUserOrAdmin(permissions.BasePermission):
             or request.user.role == ADMIN)
         )
 
-
+# Используется
 class IsSameUserOrRestricted(permissions.BasePermission):
     """Проверяет, что пользователь залогинен и запрашивает записи о себе."""
 

@@ -2,10 +2,12 @@ from django.contrib.auth import get_user_model
 from recipes.models import Ingredient, Recipe, RecipeIngredient, Tag
 from rest_framework import serializers
 from shoppinglist.models import Favorites, ShoppingCart
-from shoppinglist.utils import is_in_list
+from foodgram_backend.utils import is_in_list
 from users.serializers import CustomUserSerializer
 
 from foodgram_backend.fields import Base64ImageField
+
+from foodgram_backend.constants import MAX_NAMES_LENGTH
 
 User = get_user_model()
 
@@ -50,12 +52,7 @@ class RecipeIngredientSerializer(serializers.ModelSerializer):
             "amount",
         )
         model = RecipeIngredient
-
-    def validate_amount(self, value):
-        if value < 1:
-            raise serializers.ValidationError("Количество ингредиента не может быть меньше!")
-        return value 
-    
+  
 
 
 
@@ -68,12 +65,14 @@ class RecipeAddingSerializer(serializers.ModelSerializer):
         many=True,
         required=True,
         allow_null=False,
-        allow_empty=False, #
+        allow_empty=False,
     )
-    image = Base64ImageField(required=False, allow_null=True)
+    image = Base64ImageField(required=True, allow_null=True)
     author = serializers.SlugRelatedField(
         slug_field="username", read_only=True
     )
+    name = serializers.CharField(required=True, max_length=MAX_NAMES_LENGTH)
+    text = serializers.CharField(required=True)
 
     class Meta:
         model = Recipe
@@ -96,6 +95,13 @@ class RecipeAddingSerializer(serializers.ModelSerializer):
             keys.append(id)
         if len(keys) != len(set(keys)):
             raise serializers.ValidationError("Ингредиенты не могут повторяться!")
+        return value
+    
+    def validate_tags(self, value):
+
+        unique_tags = set(value)
+        if len(value) != len(unique_tags):
+            raise serializers.ValidationError("Теги не могут повторяться!")
         return value
 
 

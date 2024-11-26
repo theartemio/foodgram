@@ -4,8 +4,8 @@ from django.dispatch import receiver
 
 from foodgram_backend.utils import get_ingredients_with_amounts
 
-from .models import ShoppingCart
-from .utils import upgrade_ingredient_list
+from .models import ShoppingCart, UserIngredients
+from foodgram_backend.utils import upgrade_ingredient_list
 
 User = get_user_model()
 
@@ -22,7 +22,10 @@ def add_to_ingredient_list(sender, instance, created, **kwargs):
         ingredients = get_ingredients_with_amounts(recipe_id)
         if ingredients:
             upgrade_ingredient_list(
-                ingredients=ingredients, user=user, adding=True
+                ingredients=ingredients,
+                user=user,
+                model=UserIngredients,
+                adding=True,
             )
 
 
@@ -37,5 +40,8 @@ def remove_from_ingredient_list(sender, instance, **kwargs):
     ingredients = get_ingredients_with_amounts(recipe_id)
     if ingredients:
         upgrade_ingredient_list(
-            ingredients=ingredients, user=user, adding=False
+            ingredients=ingredients,
+            user=user,
+            model=UserIngredients,
+            adding=False,
         )
