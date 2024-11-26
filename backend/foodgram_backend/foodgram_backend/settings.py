@@ -30,11 +30,12 @@ INSTALLED_APPS = [
     'rest_framework.authtoken',
     'rest_framework_simplejwt',
     'djoser',
+    'django_filters',
+    'shortener',
     'api.apps.ApiConfig',
     'users.apps.UsersConfig',
     'recipes.apps.RecipesConfig',
     'shoppinglist.apps.ShoppinglistConfig',
-    'shortener'
 ]
 
 MIDDLEWARE = [
@@ -80,6 +81,7 @@ REST_FRAMEWORK = {
 # Djoser settings
 DJOSER = {
     'SERIALIZERS': {
+        'user_create': 'users.serializers.CustomUserCreateSerializer',
         'current_user': 'users.serializers.CustomUserSerializer',
         'user': 'users.serializers.CustomUserSerializer',
     },

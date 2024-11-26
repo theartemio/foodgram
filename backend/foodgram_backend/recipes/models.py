@@ -26,7 +26,7 @@ class Tag(NameMixin, models.Model):
 class Ingredient(NameMixin, models.Model):
     """Модель для хранения ингредиентов."""
 
-    measure_unit = models.CharField(
+    measurement_unit = models.CharField(
         max_length=MAX_NAMES_LENGTH,
         verbose_name="Единица измерения",
         help_text=(

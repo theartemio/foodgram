@@ -11,13 +11,21 @@ from rest_framework.decorators import (
 from rest_framework.permissions import (
     IsAuthenticated,
     IsAuthenticatedOrReadOnly,
+    AllowAny,
 )
 from rest_framework.response import Response
-from rest_framework.mixins import RetrieveModelMixin, ListModelMixin
+from rest_framework.mixins import (
+    RetrieveModelMixin,
+    ListModelMixin,
+    CreateModelMixin,
+    UpdateModelMixin,
+)
 from shoppinglist.models import ShoppingCart, UserIngredients
 from users.permissions import IsAdminOrReadonly, IsAuthorOrReadOnly
+from django.http import Http404
 
-from .mixins import GetMixin, PaginationMixin, NoPaginationMixin, SearchMixin
+
+from .mixins import NoPaginationMixin, SearchMixin, SearchAndFilterMixin
 from .serializers import (
     IngredientSerializer,
     RecipeDetailSerializer,
@@ -28,6 +36,8 @@ from .serializers import (
 
 
 class TagViewSet(
+    # UpdateModelMixin,
+    # CreateModelMixin,
     NoPaginationMixin,
     RetrieveModelMixin,
     ListModelMixin,
@@ -37,9 +47,11 @@ class TagViewSet(
 
     queryset = Tag.objects.all()
     serializer_class = TagSerializer
+    permission_classes = (AllowAny,)
 
 
 class IngredientViewSet(
+    # CreateModelMixin,
     SearchMixin,
     NoPaginationMixin,
     RetrieveModelMixin,
@@ -50,9 +62,10 @@ class IngredientViewSet(
 
     queryset = Ingredient.objects.all()
     serializer_class = IngredientSerializer
+    permission_classes = (AllowAny,)
 
 
-class RecipeViewSet(viewsets.ModelViewSet):
+class RecipeViewSet(viewsets.ModelViewSet, SearchAndFilterMixin):
     """
     ViewSet для работы с рецептами.
     """
@@ -66,6 +79,7 @@ class RecipeViewSet(viewsets.ModelViewSet):
     )
     permission_classes = (IsAuthorOrReadOnly,)
     serializer_class = RecipeAddingSerializer
+    ordering_fields = ("-pub_date",)
 
     def list(self, request, *args, **kwargs):
         """Выдача объектов списом по нужной форме."""
@@ -96,18 +110,71 @@ class RecipeViewSet(viewsets.ModelViewSet):
         serializer.is_valid(raise_exception=True)
         ingredient_list = serializer.validated_data.pop("ingredients")
         recipe = serializer.save(author=self.request.user)
+
+        if not ingredient_list:
+            return Response(
+                {"ingredients": "Список ингредиентов не может быть пустым!"},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+        # Вынести в функцию
         for ingredient in ingredient_list:
             ingredient_serializer = RecipeIngredientSerializer(data=ingredient)
             ingredient_serializer.is_valid(raise_exception=True)
-            current_ingredient = get_object_or_404(
-                Ingredient, id=ingredient["id"]
-            )
+            try:
+                current_ingredient = get_object_or_404(
+                    Ingredient, id=ingredient["id"]
+                )
+            except Http404:
+                return Response(
+                    {"error": "Ингредиент не найден!"},
+                    status=status.HTTP_400_BAD_REQUEST,
+                )
+
             ingredient_serializer.save(
                 ingredient=current_ingredient, recipe=recipe
             )
         serializer = RecipeDetailSerializer(
             recipe, context={"request": request}
         )
+        return Response(serializer.data, status=status.HTTP_201_CREATED)
+
+    # Привести в порядок
+    def update(self, request, *args, **kwargs):
+        partial = kwargs.pop("partial", False)
+        instance = self.get_object()
+        serializer = self.get_serializer(
+            instance, data=request.data, partial=partial
+        )
+        serializer.is_valid(raise_exception=True)
+
+        recipe = serializer.save(author=self.request.user)
+
+        if "ingredients" in serializer.validated_data.keys():
+            ingredient_list = serializer.validated_data.pop("ingredients")
+            for ingredient in ingredient_list:
+                ingredient_serializer = RecipeIngredientSerializer(
+                    data=ingredient
+                )
+                ingredient_serializer.is_valid(raise_exception=True)
+                try:
+                    current_ingredient = get_object_or_404(
+                        Ingredient, id=ingredient["id"]
+                    )
+                except Http404:
+                    return Response(
+                        {"error": "Ингредиент не найден!"},
+                        status=status.HTTP_400_BAD_REQUEST,
+                    )
+
+                ingredient_serializer.save(
+                    ingredient=current_ingredient, recipe=recipe
+                )
+
+        self.perform_update(serializer)
+        serializer = RecipeDetailSerializer(
+            recipe, context={"request": request}
+        )
+
         return Response(serializer.data)
 
 
@@ -119,7 +186,7 @@ def download_shopping_list(request):
     user = request.user
     users_ingredients = UserIngredients.objects.filter(user=user.id)
     formatted_lines = [
-        f"{i.ingredient.name}, ({i.ingredient.measure_unit}) - {i.total}"
+        f"{i.ingredient.name}, ({i.ingredient.measurement_unit}) - {i.total}"
         for i in users_ingredients
     ]
     response_data = "\n".join(formatted_lines)

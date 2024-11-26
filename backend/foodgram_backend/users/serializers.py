@@ -7,6 +7,9 @@ from foodgram_backend.fields import Base64ImageField
 from foodgram_backend.utils import get_image_url
 
 from .models import Follow
+from .mixins import ValidateUsernameMixin
+
+from djoser.serializers import UserCreateSerializer
 
 User = get_user_model()
 
@@ -17,7 +20,7 @@ class AvatarSerializer(serializers.ModelSerializer):
     через поле Base64ImageField.
     """
 
-    avatar = Base64ImageField(required=False, allow_null=True)
+    avatar = Base64ImageField(required=True, allow_null=True)
 
     class Meta:
         model = User
@@ -34,6 +37,7 @@ class AvatarSerializer(serializers.ModelSerializer):
             "avatar": image_url,
         }
         return data
+
 
 # Перенести в подобающее место #
 class RecipeSubscriptionsSerializer(serializers.ModelSerializer):
@@ -85,9 +89,15 @@ class FollowSerializer(serializers.ModelSerializer):
         model = Follow
 
 
+class CustomUserCreateSerializer(ValidateUsernameMixin, UserCreateSerializer):
+    """
+    Кастомный сериализатор для регистрации пользователя с проверкой юзернейма.
+    """
 
-#### Можно объединить с тем что снизу, сделать миксин ####
-class CustomUserSerializer(UserSerializer):
+    pass
+
+
+class CustomUserSerializer(ValidateUsernameMixin, UserSerializer):
     """
     Сериализатор пользователя просмотра пользователя
     в сокращенном виде, без списка рецептов и их счетчика.
@@ -108,14 +118,15 @@ class CustomUserSerializer(UserSerializer):
         ]
 
     def get_is_subscribed(self, obj):
-        """Проверяет подписку. В случае анонимного пользователя возвращает False"""
-        
+        """
+        Проверяет подписку. В случае анонимного
+        пользователя возвращает False.
+        """
+
         user = self.context["request"].user
         if user.is_anonymous:
             return False
-        subscribed = Follow.objects.filter(
-                user=user, following=obj
-            ).exists()
+        subscribed = Follow.objects.filter(user=user, following=obj).exists()
         return subscribed
 
 
@@ -155,4 +166,3 @@ class SubscriptionsUsersSerializer(UserSerializer):
         if recipes:
             return recipes.count()
         return 0
-

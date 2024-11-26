@@ -29,7 +29,7 @@ class IngredientSerializer(serializers.ModelSerializer):
         fields = (
             "id",
             "name",
-            "measure_unit",
+            "measurement_unit",
         )
         model = Ingredient
 
@@ -41,6 +41,9 @@ class RecipeIngredientSerializer(serializers.ModelSerializer):
     к рецепту.
     """
 
+    # id = serializers.PrimaryKeyRelatedField(queryset=Ingredient.objects.all()) # Может не работать
+    # recipe = serializers.PrimaryKeyRelatedField(queryset=Recipe.objects.all()) # Может не работать
+
     class Meta:
         fields = (
             "id",
@@ -48,17 +51,24 @@ class RecipeIngredientSerializer(serializers.ModelSerializer):
         )
         model = RecipeIngredient
 
+    def validate_amount(self, value):
+        if value < 1:
+            raise serializers.ValidationError("Количество ингредиента не может быть меньше!")
+        return value 
+    
+
+
 
 class RecipeAddingSerializer(serializers.ModelSerializer):
     """Сериализатор для добавления рецептов."""
 
-    ingredients = serializers.ListField(required=False)
+    ingredients = serializers.ListField(required=True)
     tags = serializers.PrimaryKeyRelatedField(
         queryset=Tag.objects.all(),
         many=True,
-        required=False,
+        required=True,
         allow_null=False,
-        allow_empty=True,
+        allow_empty=False, #
     )
     image = Base64ImageField(required=False, allow_null=True)
     author = serializers.SlugRelatedField(
@@ -77,6 +87,16 @@ class RecipeAddingSerializer(serializers.ModelSerializer):
             "cooking_time",
         )
         read_only_fields = ("author",)
+
+    def validate_ingredients(self, value):
+        
+        keys = []
+        for ingredient in value:
+            id = ingredient["id"]
+            keys.append(id)
+        if len(keys) != len(set(keys)):
+            raise serializers.ValidationError("Ингредиенты не могут повторяться!")
+        return value
 
 
 class RecipeDetailSerializer(serializers.ModelSerializer):
@@ -127,3 +147,16 @@ class RecipeDetailSerializer(serializers.ModelSerializer):
             object=obj,
         )
         return in_shopping_cart
+
+    def to_representation(self, instance):
+        """Добавляет к списку ингредиентов количества."""
+        data = super(RecipeDetailSerializer, self).to_representation(instance)
+        ingredients = data["ingredients"]
+        recipe_id = data["id"]
+        for ingredient in ingredients:
+            amount = RecipeIngredient.objects.get(
+                ingredient_id=ingredient["id"], recipe_id=recipe_id
+            ).amount
+            ingredient["amount"] = amount
+        data.update({"ingredients": ingredients})
+        return data

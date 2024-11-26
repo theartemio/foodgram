@@ -4,6 +4,8 @@ from rest_framework import serializers, status, viewsets
 from rest_framework.mixins import CreateModelMixin, DestroyModelMixin
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
+from django.shortcuts import get_object_or_404
+from django.http import Http404
 
 from foodgram_backend.utils import get_image_url
 
@@ -33,6 +35,7 @@ class UserRecipeListsMixin:
         user = data["user"]
         if model.objects.filter(user=user, recipe=data["recipe"]).exists():
             raise serializers.ValidationError("Рецепт уже добавлен")
+
         return data
 
     def to_representation(self, instance):

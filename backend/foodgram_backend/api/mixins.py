@@ -1,5 +1,6 @@
 from rest_framework import filters, response, status
 from rest_framework.pagination import LimitOffsetPagination
+from django_filters.rest_framework import DjangoFilterBackend
 
 # from users.permissions import IsAdminOrReadonly, IsAuthOrReadOnly
 from foodgram_backend.constants import GET_POST_DELETE, GET
@@ -10,39 +11,26 @@ class NoPaginationMixin:
 
     pagination_class = None
 
-class PaginationMixin:
-    """Миксин для настройки пагинации."""
-
-    pagination_class = LimitOffsetPagination
-
-'''
-class AuthorPermissionMixin:
-    """Миксин для проверки доступа автора и модера."""
-
-    permission_classes = (IsAuthOrReadOnly,)
-
-
-class AdminOrReadOnlyMixin:
-    """Миксин для проверки админства."""
-
-    permission_classes = (IsAdminOrReadonly,)
-'''
-
-class GetMixin:
-    """Миксин для ограничения методов."""
-
-    http_method_names = GET
-
-    def create(self, request, *args, **kwargs):
-        return response.Response(status=status.HTTP_405_METHOD_NOT_ALLOWED)
-
-
-
-
-
 class SearchMixin:
     """Миксин для настройки поиска по имени."""
 
     # lookup_field = "slug"  # Фильтр по слагу, не нужен в этом проекте
     filter_backends = (filters.SearchFilter,)
     search_fields = ("name",)
+
+
+class SearchAndFilterMixin:
+    """
+    Миксин для фильтрации по тегам и
+    поиска по:
+        - Названию
+        - Автору
+    """
+
+    # lookup_field = "slug"
+    # filter_backends = (filters.SearchFilter,)
+    filter_backends = (DjangoFilterBackend,)
+    filterset_fields = ("is_favorited",
+            "is_in_shopping_cart",) 
+    # search_fields = ("name",)
+    pass
