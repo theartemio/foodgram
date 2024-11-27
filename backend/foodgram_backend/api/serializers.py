@@ -59,6 +59,7 @@ class RecipeAddingSerializer(serializers.ModelSerializer):
     """Сериализатор для добавления рецептов."""
 
     ingredients = serializers.ListField(required=True)
+    # ingredients = RecipeIngredientSerializer(many=True)
     tags = serializers.PrimaryKeyRelatedField(
         queryset=Tag.objects.all(),
         many=True,
@@ -111,6 +112,8 @@ class RecipeAddingSerializer(serializers.ModelSerializer):
         if len(value) != len(unique_tags):
             raise serializers.ValidationError("Теги не могут повторяться!")
         return value
+
+
 
 
 class RecipeDetailSerializer(serializers.ModelSerializer):

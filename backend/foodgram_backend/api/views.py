@@ -1,6 +1,12 @@
 from django.http import HttpResponse
 from django.shortcuts import get_object_or_404
-from recipes.models import Ingredient, Recipe, RecipeIngredient, Tag
+from recipes.models import (
+    Ingredient,
+    Recipe,
+    RecipeIngredient,
+    Tag,
+    ShortenedLinks,
+)
 from rest_framework import serializers, status, viewsets
 from rest_framework.authentication import TokenAuthentication
 from rest_framework.decorators import (
@@ -10,7 +16,6 @@ from rest_framework.decorators import (
 )
 from rest_framework.permissions import (
     IsAuthenticated,
-    IsAuthenticatedOrReadOnly,
     AllowAny,
 )
 from rest_framework.response import Response
@@ -20,11 +25,12 @@ from rest_framework.mixins import (
     CreateModelMixin,
     UpdateModelMixin,
 )
-from shoppinglist.models import ShoppingCart, UserIngredients
-from users.permissions import IsAdminOrReadonly, IsAuthorOrReadOnly
+from django.urls import reverse
+from shoppinglist.models import UserIngredients
+from users.permissions import IsAuthorOrReadOnly
 from django.http import Http404
 from django_filters.rest_framework import DjangoFilterBackend
-
+from rest_framework.decorators import action
 
 from .mixins import NoPaginationMixin, SearchMixin
 from .serializers import (
@@ -115,11 +121,14 @@ class RecipeViewSet(
         serializer = self.serializer_class(data=raw_data)
         serializer.is_valid(raise_exception=True)
         ingredient_list = serializer.validated_data.pop("ingredients")
-        
-        # Тут нужно чтобы сериализатор проверял ингредиенты. Иначе сохраняется рецепт без них
-
         recipe = serializer.save(author=self.request.user)
-        # Хочу вынести
+
+        if not ingredient_list:
+            return Response(
+                {"ingredients": "Список ингредиентов не может быть пустым!"},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+        # Вынести в функцию
         for ingredient in ingredient_list:
             ingredient_serializer = RecipeIngredientSerializer(data=ingredient)
             ingredient_serializer.is_valid(raise_exception=True)
@@ -132,6 +141,7 @@ class RecipeViewSet(
                     {"error": "Ингредиент не найден!"},
                     status=status.HTTP_400_BAD_REQUEST,
                 )
+
             ingredient_serializer.save(
                 ingredient=current_ingredient, recipe=recipe
             )
@@ -149,24 +159,20 @@ class RecipeViewSet(
         )
         serializer.is_valid(raise_exception=True)
 
-
-
         if "ingredients" not in serializer.validated_data.keys():
-                return Response(
-                    {"error": "Поле ингредиенты обязательно!"},
-                    status=status.HTTP_400_BAD_REQUEST,
-                )
+            return Response(
+                {"error": "Поле ингредиенты обязательно!"},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
         if "tags" not in serializer.validated_data.keys():
-                return Response(
-                    {"error": "Поле ингредиенты обязательно!"},
-                    status=status.HTTP_400_BAD_REQUEST,
-                )
+            return Response(
+                {"error": "Поле ингредиенты обязательно!"},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
         ingredient_list = serializer.validated_data.pop("ingredients")
         recipe = serializer.save(author=self.request.user)
         for ingredient in ingredient_list:
-            ingredient_serializer = RecipeIngredientSerializer(
-                data=ingredient
-            )
+            ingredient_serializer = RecipeIngredientSerializer(data=ingredient)
             ingredient_serializer.is_valid(raise_exception=True)
             try:
                 current_ingredient = get_object_or_404(
@@ -188,6 +194,22 @@ class RecipeViewSet(
         )
 
         return Response(serializer.data)
+
+    @action(detail=True, methods=["GET"])
+    def get_link(self, request, pk):
+        """Создает постоянную короткую ссылку для рецепта."""
+        long_url = request.get_full_path().replace("get_link/", "")
+        url, created = ShortenedLinks.objects.get_or_create(
+            original_url=long_url
+        )
+        short_code = url.short_link_code
+        short_path = reverse("short-link", kwargs={"short_code": short_code})
+        short_link = request.build_absolute_uri(short_path)
+        response = Response(
+            {"short-link": short_link},
+            status=status.HTTP_200_OK,
+        )
+        return response
 
 
 @api_view(["GET"])

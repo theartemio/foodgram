@@ -1,10 +1,17 @@
 from django.contrib.auth import get_user_model
 from django.db import models
 
-from foodgram_backend.constants import MAX_NAMES_LENGTH, MAX_SLUG_LENGTH
+from foodgram_backend.constants import (
+    MAX_NAMES_LENGTH,
+    MAX_SLUG_LENGTH,
+    MAX_SHORT_LINK_CODE,
+)
 
 from .abstract_models import NameMixin
-from django.core.validators import MinValueValidator 
+from django.core.validators import MinValueValidator
+
+import string
+import random
 
 User = get_user_model()
 
@@ -146,3 +153,36 @@ class RecipeIngredient(models.Model):
         verbose_name="Количество",
         help_text="Количество ингредиента, необходимое для рецепта.",
     )
+
+
+class ShortenedLinks(models.Model):
+    """Модель для хранения пар "длинная ссылка-короткий индекс"."""
+
+    original_url = models.URLField()
+    short_link_code = models.CharField(
+        max_length=MAX_SHORT_LINK_CODE, unique=True
+    )
+
+    def save(self, *args, **kwargs):
+        """
+        Автоматическое добавление короткого кода.
+        Если код уже есть в базе, то код не генерируется.
+        """
+        if not self.short_link_code:
+            self.short_link_code = self.generate_short_code()
+        super(ShortenedLinks, self).save(*args, **kwargs)
+
+    def generate_short_code(self):
+        """Генератор коротких кодов"""
+        characters = string.ascii_letters + string.digits
+        while True:
+            short_link_code = "".join(
+                random.choices(characters, k=MAX_SHORT_LINK_CODE)
+            )
+            if not ShortenedLinks.objects.filter(
+                short_link_code=short_link_code
+            ).exists():
+                return short_link_code
+
+    def __str__(self):
+        return self.original_url

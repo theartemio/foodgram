@@ -1,3 +1,5 @@
+# Short link code length
+MAX_SHORT_LINK_CODE = 3
 
 # Recipe, tag, ingredient constants
 

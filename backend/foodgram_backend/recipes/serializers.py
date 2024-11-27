@@ -9,7 +9,7 @@ from foodgram_backend.fields import Base64ImageField
 User = get_user_model()
 
 class RecipeSubscriptionsSerializer(serializers.ModelSerializer):
-    """Сериализатор для детального рецептов в списке подписок."""
+    """Сериализатор для просмотра краткой информации о рецептах в списке подписок."""
 
     image = Base64ImageField(required=False, allow_null=True)
 
