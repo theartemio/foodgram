@@ -1,6 +1,5 @@
-from rest_framework import permissions
-
 from foodgram_backend.constants import ADMIN
+from rest_framework import permissions
 
 
 class IsAuthorOrReadOnly(permissions.BasePermission):

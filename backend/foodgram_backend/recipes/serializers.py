@@ -1,12 +1,7 @@
-from django.contrib.auth import get_user_model
-
-from recipes.models import Recipe
-from rest_framework import serializers
-
+from .models import Recipe
 from foodgram_backend.fields import Base64ImageField
-
-
-User = get_user_model()
+from foodgram_backend.utils import get_image_url
+from rest_framework import serializers
 
 class RecipeSubscriptionsSerializer(serializers.ModelSerializer):
     """Сериализатор для просмотра краткой информации о рецептах в списке подписок."""
@@ -21,3 +16,4 @@ class RecipeSubscriptionsSerializer(serializers.ModelSerializer):
             "image",
             "cooking_time",
         )
+

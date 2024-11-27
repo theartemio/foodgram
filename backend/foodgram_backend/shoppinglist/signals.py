@@ -1,11 +1,10 @@
 from django.contrib.auth import get_user_model
-from django.db.models.signals import post_save, post_delete
+from django.db.models.signals import post_delete, post_save
 from django.dispatch import receiver
-
-from foodgram_backend.utils import get_ingredients_with_amounts
+from foodgram_backend.utils import (get_ingredients_with_amounts,
+                                    upgrade_ingredient_list)
 
 from .models import ShoppingCart, UserIngredients
-from foodgram_backend.utils import upgrade_ingredient_list
 
 User = get_user_model()
 

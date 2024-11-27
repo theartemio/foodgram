@@ -1,7 +1,7 @@
 from rest_framework import serializers
 
-from .serializer_mixins import UserRecipeListsMixin
 from .models import Favorites, ShoppingCart
+from .serializer_mixins import UserRecipeListsMixin
 
 
 class FavoritesSerializer(UserRecipeListsMixin, serializers.ModelSerializer):

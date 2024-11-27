@@ -1,8 +1,8 @@
 from django.contrib.auth import get_user_model
 
-from .viewset_mixins import ManageUserListsViewSet
-from .serializers import FavoritesSerializer, ShoppingCartSerializer
 from .models import Favorites, ShoppingCart
+from .serializers import FavoritesSerializer, ShoppingCartSerializer
+from .viewset_mixins import ManageUserListsViewSet
 
 User = get_user_model()
 

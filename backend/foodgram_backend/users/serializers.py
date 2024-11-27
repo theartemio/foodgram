@@ -1,15 +1,12 @@
+from recipes.serializers import RecipeSubscriptionsSerializer
 from django.contrib.auth import get_user_model
-from djoser.serializers import UserSerializer
-from rest_framework import serializers
-
+from djoser.serializers import UserCreateSerializer, UserSerializer
 from foodgram_backend.fields import Base64ImageField
 from foodgram_backend.utils import get_image_url
+from rest_framework import serializers
 
-from .models import Follow
 from .mixins import ValidateUsernameMixin
-
-from djoser.serializers import UserCreateSerializer
-from recipes.serializers import RecipeSubscriptionsSerializer
+from .models import Follow
 
 User = get_user_model()
 
@@ -84,6 +81,14 @@ class SubscriptionsUsersSerializer(UserSerializer):
         user = self.context["request"].user
         subscribed = Follow.objects.filter(user=user, following=obj).exists()
         return subscribed
+
+    def get_recipes(self, obj):
+        """Возвращает количество рецептов в зависимости от параметра recipes_limit"""
+        limit = self.context.get("recipes_limit")
+        recipes_qs = obj.recipes.all()
+        if limit is not None:
+            recipes_qs = recipes_qs[:limit]
+        return RecipeSubscriptionsSerializer(recipes_qs, many=True).data
 
     def get_recipes_count(self, obj):
         """Считает рецепты."""

@@ -1,46 +1,25 @@
-from django.http import HttpResponse
+from django.http import Http404, HttpResponse
 from django.shortcuts import get_object_or_404
-from recipes.models import (
-    Ingredient,
-    Recipe,
-    RecipeIngredient,
-    Tag,
-    ShortenedLinks,
-)
-from rest_framework import serializers, status, viewsets
-from rest_framework.authentication import TokenAuthentication
-from rest_framework.decorators import (
-    api_view,
-    authentication_classes,
-    permission_classes,
-)
-from rest_framework.permissions import (
-    IsAuthenticated,
-    AllowAny,
-)
-from rest_framework.response import Response
-from rest_framework.mixins import (
-    RetrieveModelMixin,
-    ListModelMixin,
-    CreateModelMixin,
-    UpdateModelMixin,
-)
 from django.urls import reverse
+from django_filters.rest_framework import DjangoFilterBackend
+from recipes.models import Ingredient, Recipe, ShortenedLinks, Tag
+from rest_framework import status, viewsets
+from rest_framework.authentication import TokenAuthentication
+from rest_framework.decorators import (action, api_view,
+                                       authentication_classes,
+                                       permission_classes)
+from rest_framework.mixins import (CreateModelMixin, ListModelMixin,
+                                   RetrieveModelMixin, UpdateModelMixin)
+from rest_framework.permissions import AllowAny, IsAuthenticated
+from rest_framework.response import Response
 from shoppinglist.models import UserIngredients
 from users.permissions import IsAuthorOrReadOnly
-from django.http import Http404
-from django_filters.rest_framework import DjangoFilterBackend
-from rest_framework.decorators import action
 
-from .mixins import NoPaginationMixin, SearchMixin
-from .serializers import (
-    IngredientSerializer,
-    RecipeDetailSerializer,
-    RecipeAddingSerializer,
-    RecipeIngredientSerializer,
-    TagSerializer,
-)
 from .filtersets import RecipeFilter
+from .mixins import NoPaginationMixin, SearchMixin
+from .serializers import (IngredientSerializer, RecipeAddingSerializer,
+                          RecipeDetailSerializer, RecipeIngredientSerializer,
+                          TagSerializer)
 
 
 class TagViewSet(
@@ -197,7 +176,7 @@ class RecipeViewSet(
 
     @action(detail=True, methods=["GET"], url_path="get-link")
     def get_link(self, request, pk):
-        """Создает постоянную короткую ссылку для рецепта.""" 
+        """Создает постоянную короткую ссылку для рецепта."""
         long_url = request.get_full_path().replace("get-link/", "")
         url, created = ShortenedLinks.objects.get_or_create(
             original_url=long_url

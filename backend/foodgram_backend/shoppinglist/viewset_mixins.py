@@ -1,12 +1,10 @@
 from django.contrib.auth import get_user_model
-from recipes.models import Recipe
-from rest_framework import serializers, status, viewsets
+from django.http import Http404
+from django.shortcuts import get_object_or_404
+from rest_framework import status, viewsets
 from rest_framework.mixins import CreateModelMixin
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
-from django.http import Http404
-from django.shortcuts import get_object_or_404
-
 
 User = get_user_model()
 

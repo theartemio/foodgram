@@ -1,17 +1,13 @@
-from django.contrib.auth import get_user_model
-from django.db import models
+import random
+import string
 
-from foodgram_backend.constants import (
-    MAX_NAMES_LENGTH,
-    MAX_SLUG_LENGTH,
-    MAX_SHORT_LINK_CODE,
-)
+from django.contrib.auth import get_user_model
+from django.core.validators import MinValueValidator
+from django.db import models
+from foodgram_backend.constants import (MAX_NAMES_LENGTH, MAX_SHORT_LINK_CODE,
+                                        MAX_SLUG_LENGTH)
 
 from .abstract_models import NameMixin
-from django.core.validators import MinValueValidator
-
-import string
-import random
 
 User = get_user_model()
 
@@ -173,7 +169,7 @@ class ShortenedLinks(models.Model):
         super(ShortenedLinks, self).save(*args, **kwargs)
 
     def generate_short_code(self):
-        """Генератор коротких кодов"""
+        """Генератор коротких кодов."""
         characters = string.ascii_letters + string.digits
         while True:
             short_link_code = "".join(

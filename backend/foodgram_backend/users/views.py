@@ -1,20 +1,17 @@
 from django.contrib.auth import get_user_model
+from django.http import Http404
 from django.shortcuts import get_object_or_404
+from djoser.views import UserViewSet
 from rest_framework import filters, status, viewsets
 from rest_framework.mixins import CreateModelMixin, ListModelMixin
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
-from django.http import Http404
 
 from .models import CustomUser, Follow
 from .permissions import IsSameUserOrRestricted
-from .serializers import (
-    AvatarSerializer,
-    FollowSerializer,
-    SubscriptionsUsersSerializer,
-)
-from djoser.views import UserViewSet
+from .serializers import (AvatarSerializer, FollowSerializer,
+                          SubscriptionsUsersSerializer)
 
 User = get_user_model()
 
@@ -144,3 +141,13 @@ class SubscribeViewSet(
             {"detail": "Подписка удалена."},
             status=status.HTTP_204_NO_CONTENT,
         )
+
+    def get_serializer_context(self):
+        """Лимит рецептов."""
+        context = super().get_serializer_context()
+        recipes_limit = self.request.query_params.get("recipes_limit")
+        if recipes_limit and recipes_limit.isdigit():
+            context["recipes_limit"] = int(recipes_limit)
+        else:
+            context["recipes_limit"] = None
+        return context

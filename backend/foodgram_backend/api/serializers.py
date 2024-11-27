@@ -1,17 +1,21 @@
 from django.contrib.auth import get_user_model
+from foodgram_backend.constants import MAX_NAMES_LENGTH
+from foodgram_backend.fields import Base64ImageField
+from foodgram_backend.utils import is_in_list
 from recipes.models import Ingredient, Recipe, RecipeIngredient, Tag
 from rest_framework import serializers
 from shoppinglist.models import Favorites, ShoppingCart
-from foodgram_backend.utils import is_in_list
-from users.serializers import CustomUserSerializer
-from django.shortcuts import get_object_or_404
 
+from django.contrib.auth import get_user_model
 from foodgram_backend.fields import Base64ImageField
-from django.http import Http404
+from foodgram_backend.utils import get_image_url
+from rest_framework import serializers
+ 
 
-from foodgram_backend.constants import MAX_NAMES_LENGTH
+from users.serializers import CustomUserSerializer
 
 User = get_user_model()
+
 
 
 class TagSerializer(serializers.ModelSerializer):
@@ -45,8 +49,6 @@ class RecipeIngredientSerializer(serializers.ModelSerializer):
     к рецепту.
     """
 
-    # id = serializers.PrimaryKeyRelatedField(queryset=Ingredient.objects.all())
-
     class Meta:
         fields = (
             "id",
@@ -59,7 +61,6 @@ class RecipeAddingSerializer(serializers.ModelSerializer):
     """Сериализатор для добавления рецептов."""
 
     ingredients = serializers.ListField(required=True)
-    # ingredients = RecipeIngredientSerializer(many=True)
     tags = serializers.PrimaryKeyRelatedField(
         queryset=Tag.objects.all(),
         many=True,
