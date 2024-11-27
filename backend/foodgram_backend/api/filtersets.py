@@ -46,7 +46,6 @@ class RecipeFilter(filters.FilterSet):
         user = self.request.user
         if not user.is_authenticated:
             return queryset.none() if value else queryset
-
         return queryset.annotate(
             is_in_shopping_cart=Exists(
                 ShoppingCart.objects.filter(user=user, recipe=OuterRef("pk"))

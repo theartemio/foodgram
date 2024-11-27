@@ -195,10 +195,10 @@ class RecipeViewSet(
 
         return Response(serializer.data)
 
-    @action(detail=True, methods=["GET"])
+    @action(detail=True, methods=["GET"], url_path="get-link")
     def get_link(self, request, pk):
-        """Создает постоянную короткую ссылку для рецепта."""
-        long_url = request.get_full_path().replace("get_link/", "")
+        """Создает постоянную короткую ссылку для рецепта.""" 
+        long_url = request.get_full_path().replace("get-link/", "")
         url, created = ShortenedLinks.objects.get_or_create(
             original_url=long_url
         )

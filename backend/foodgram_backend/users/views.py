@@ -18,6 +18,7 @@ from djoser.views import UserViewSet
 
 User = get_user_model()
 
+
 class CustomUserViewSet(UserViewSet):
     def me(self, request, *args, **kwargs):
         if not request.user.is_authenticated:
@@ -26,6 +27,7 @@ class CustomUserViewSet(UserViewSet):
                 status=status.HTTP_401_UNAUTHORIZED,
             )
         return super().me(request, *args, **kwargs)
+
 
 class AvatarAPIView(APIView):
     """

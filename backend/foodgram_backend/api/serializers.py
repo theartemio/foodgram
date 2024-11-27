@@ -45,7 +45,7 @@ class RecipeIngredientSerializer(serializers.ModelSerializer):
     к рецепту.
     """
 
-    id = serializers.PrimaryKeyRelatedField(queryset=Ingredient.objects.all())
+    # id = serializers.PrimaryKeyRelatedField(queryset=Ingredient.objects.all())
 
     class Meta:
         fields = (
@@ -107,13 +107,10 @@ class RecipeAddingSerializer(serializers.ModelSerializer):
         return value
 
     def validate_tags(self, value):
-
         unique_tags = set(value)
         if len(value) != len(unique_tags):
             raise serializers.ValidationError("Теги не могут повторяться!")
         return value
-
-
 
 
 class RecipeDetailSerializer(serializers.ModelSerializer):
