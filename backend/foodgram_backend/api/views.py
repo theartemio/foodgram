@@ -5,11 +5,18 @@ from django_filters.rest_framework import DjangoFilterBackend
 from recipes.models import Ingredient, Recipe, ShortenedLinks, Tag
 from rest_framework import status, viewsets
 from rest_framework.authentication import TokenAuthentication
-from rest_framework.decorators import (action, api_view,
-                                       authentication_classes,
-                                       permission_classes)
-from rest_framework.mixins import (CreateModelMixin, ListModelMixin,
-                                   RetrieveModelMixin, UpdateModelMixin)
+from rest_framework.decorators import (
+    action,
+    api_view,
+    authentication_classes,
+    permission_classes,
+)
+from rest_framework.mixins import (
+    CreateModelMixin,
+    ListModelMixin,
+    RetrieveModelMixin,
+    UpdateModelMixin,
+)
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
 from userlists.models import UserIngredients
@@ -17,11 +24,21 @@ from users.permissions import IsAuthorOrReadOnly
 
 from .filtersets import RecipeFilter
 from .mixins import NoPaginationMixin, SearchMixin
-from .serializers import (IngredientSerializer, RecipeAddingSerializer,
-                          RecipeDetailSerializer, RecipeIngredientSerializer,
-                          TagSerializer)
+from .serializers import (
+    IngredientSerializer,
+    RecipeAddingSerializer,
+    RecipeDetailSerializer,
+    RecipeIngredientSerializer,
+    TagSerializer,
+)
 
+from django.contrib.auth import get_user_model
 
+from userlists.models import Favorites, ShoppingCart
+from .serializers import FavoritesSerializer, ShoppingCartSerializer
+from .viewset_mixins import ManageUserListsViewSet
+
+# Вьюсеты для простых моделей
 class TagViewSet(
     # UpdateModelMixin,
     # CreateModelMixin,
@@ -50,6 +67,21 @@ class IngredientViewSet(
     queryset = Ingredient.objects.all()
     serializer_class = IngredientSerializer
     permission_classes = (AllowAny,)
+
+
+# Вьюсеты для пользовательских списков
+class ManageFavesViewSet(ManageUserListsViewSet):
+    """Вьюсет для работы со списком избранного"""
+
+    serializer_class = FavoritesSerializer
+    queryset = Favorites.objects.all()
+
+
+class ManageCartViewSet(ManageUserListsViewSet):
+    """Вьюсет для работы со списком покупок"""
+
+    serializer_class = ShoppingCartSerializer
+    queryset = ShoppingCart.objects.all()
 
 
 class RecipeViewSet(
@@ -128,7 +160,6 @@ class RecipeViewSet(
             recipe, context={"request": request}
         )
         return Response(serializer.data, status=status.HTTP_201_CREATED)
-
 
     def update(self, request, *args, **kwargs):
         partial = kwargs.pop("partial", False)

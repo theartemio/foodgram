@@ -9,12 +9,13 @@ from userlists.models import Favorites, ShoppingCart
 from django.contrib.auth import get_user_model
 from foodgram_backend.fields import Base64ImageField
 from rest_framework import serializers
- 
+
 
 from users.serializers import CustomUserSerializer
+from userlists.models import Favorites, ShoppingCart
+from .serializer_mixins import UserRecipeListsMixin
 
 User = get_user_model()
-
 
 
 class TagSerializer(serializers.ModelSerializer):
@@ -55,7 +56,7 @@ class RecipeIngredientSerializer(serializers.ModelSerializer):
         )
         model = RecipeIngredient
 
-
+# Сериализаторы для модели рецептов
 class RecipeAddingSerializer(serializers.ModelSerializer):
     """Сериализатор для добавления рецептов."""
 
@@ -174,3 +175,32 @@ class RecipeDetailSerializer(serializers.ModelSerializer):
             ingredient["amount"] = amount
         data.update({"ingredients": ingredients})
         return data
+
+
+# Сериализаторы пользовательских списков
+class FavoritesSerializer(UserRecipeListsMixin, serializers.ModelSerializer):
+    """
+    Сериализатор для составления списка избранного.
+    """
+
+    class Meta:
+        fields = (
+            "user",
+            "recipe",
+        )
+        model = Favorites
+
+
+class ShoppingCartSerializer(
+    UserRecipeListsMixin, serializers.ModelSerializer
+):
+    """
+    Сериализатор для составления списка покупок.
+    """
+
+    class Meta:
+        fields = (
+            "user",
+            "recipe",
+        )
+        model = ShoppingCart

@@ -1,6 +1,6 @@
 from django.urls import path
 
-from .views import ManageCartViewSet, ManageFavesViewSet
+from api.views import ManageCartViewSet, ManageFavesViewSet
 
 add_to_favorites = ManageFavesViewSet.as_view({"post": "create", "delete": "destroy"})
 
