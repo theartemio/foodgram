@@ -1,7 +1,6 @@
 from django.contrib.auth import get_user_model
 from django.db.models.signals import post_delete, post_save
 from django.dispatch import receiver
-
 from foodgram_backend.utils import (get_ingredients_with_amounts,
                                     upgrade_ingredient_list)
 
