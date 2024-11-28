@@ -4,7 +4,7 @@ from foodgram_backend.fields import Base64ImageField
 from foodgram_backend.utils import is_in_list
 from recipes.models import Ingredient, Recipe, RecipeIngredient, Tag
 from rest_framework import serializers
-from shoppinglist.models import Favorites, ShoppingCart
+from userlists.models import Favorites, ShoppingCart
 
 from django.contrib.auth import get_user_model
 from foodgram_backend.fields import Base64ImageField

@@ -1,9 +1,9 @@
 from django.apps import AppConfig
 
 
-class ShoppinglistConfig(AppConfig):
+class UserlistsConfig(AppConfig):
     default_auto_field = 'django.db.models.BigAutoField'
-    name = 'shoppinglist'
+    name = 'userlists'
 
     def ready(self):
         from . import signals

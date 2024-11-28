@@ -12,7 +12,7 @@ from rest_framework.mixins import (CreateModelMixin, ListModelMixin,
                                    RetrieveModelMixin, UpdateModelMixin)
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
-from shoppinglist.models import UserIngredients
+from userlists.models import UserIngredients
 from users.permissions import IsAuthorOrReadOnly
 
 from .filtersets import RecipeFilter

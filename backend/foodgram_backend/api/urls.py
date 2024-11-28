@@ -14,5 +14,5 @@ urlpatterns = [
     path("recipes/download_shopping_cart/", download_shopping_list),
     path("", include(router.urls)),
     path("", include("users.urls")),
-    path("", include("shoppinglist.urls")),
+    path("", include("userlists.urls")),
 ]
