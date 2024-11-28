@@ -11,12 +11,13 @@ services:
     image: postgres:13.10
     env_file: .env
     volumes:
-      - pg_data:/var/lib/postgresql/data
+      - pg_data_production:/var/lib/postgresql/data
   backend:
     build: theartemio/foodgram_backend:latest
     env_file: .env
     volumes:
-      - static:/backend_static
+      - static_volume:/backend_static
+      - media_volume:/app/media
     depends_on:
       - db
   frontend:
@@ -24,11 +25,12 @@ services:
     build: theartemio/foodgram_backend:latest
     command: cp -r /app/build/. /frontend_static/
     volumes:
-      - static:/frontend_static
+      - static_volume:/frontend_static
 
   gateway:
     build: theartemio/foodgram_gateway:latest
     volumes:
-      - static:/staticfiles/
+      - static_volume:/staticfiles/
+      - media_volume:/app/media
     ports:
       - 8000:80 
