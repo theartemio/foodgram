@@ -15,7 +15,7 @@ SECRET_KEY = 'django-insecure-hw49hxno!-um)gmig9#tvj(mk^b2dntrpqwr%dw-!k1523^n_^
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['84.201.153.136', 'superfoodgram3000.ddns.net']
 
 
 # Application definition
@@ -102,7 +102,7 @@ WSGI_APPLICATION = 'foodgram_backend.wsgi.application'
 
 # dev db
 
-
+"""
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.sqlite3',
@@ -116,8 +116,6 @@ DATABASES = {
 # postgresql
 DATABASES = {
     'default': {
-        # Меняем настройку Django: теперь для работы будет использоваться
-        # бэкенд postgresql
         'ENGINE': 'django.db.backends.postgresql',
         'NAME': os.getenv('POSTGRES_DB', 'django'),
         'USER': os.getenv('POSTGRES_USER', 'django'),
@@ -127,7 +125,6 @@ DATABASES = {
     }
 }
 
-"""
 
 # User model settings
 AUTH_USER_MODEL = 'users.CustomUser'
