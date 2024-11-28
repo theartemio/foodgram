@@ -129,7 +129,7 @@ class RecipeViewSet(
         )
         return Response(serializer.data, status=status.HTTP_201_CREATED)
 
-    # Привести в порядок
+
     def update(self, request, *args, **kwargs):
         partial = kwargs.pop("partial", False)
         instance = self.get_object()

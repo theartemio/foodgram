@@ -1,7 +1,7 @@
 from foodgram_backend.constants import ADMIN
 from rest_framework import permissions
 
-
+#
 class IsAuthorOrReadOnly(permissions.BasePermission):
     """Проверяет, что пользователь залогинен и он - автор записи."""
 
@@ -31,6 +31,7 @@ class IsAdminOrReadonly(permissions.BasePermission):
             and request.user.role == ADMIN
         )
 
+#
 class IsSameUserOrAdmin(permissions.BasePermission):
     """Проверяет, что пользователь залогинен и запрашивает записи о себе."""
 
@@ -72,7 +73,7 @@ class IsSameUserOrReadOnly(permissions.BasePermission):
             or obj.user == request.user
         )
 
-
+# 
 class IsSameUserOrRestricted(permissions.BasePermission):
     """Проверяет, что пользователь залогинен и запрашивает записи о себе."""
 

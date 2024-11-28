@@ -18,7 +18,7 @@ class UserRecipeListsMixin:
 
     user = serializers.PrimaryKeyRelatedField(queryset=User.objects.all())
     recipe = serializers.PrimaryKeyRelatedField(queryset=Recipe.objects.all())
-
+    
     def validate(self, data):
         """
         Проверяет что:
@@ -29,7 +29,6 @@ class UserRecipeListsMixin:
         user = data["user"]
         if model.objects.filter(user=user, recipe=data["recipe"]).exists():
             raise serializers.ValidationError("Рецепт уже добавлен")
-
         return data
 
     def to_representation(self, instance):

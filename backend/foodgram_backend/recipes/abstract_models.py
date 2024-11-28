@@ -3,7 +3,7 @@ from foodgram_backend.constants import MAX_NAMES_LENGTH, MAX_SLUG_LENGTH
 
 
 class NameMixin(models.Model):
-    """Миксин для добавления поля namne в модель."""
+    """Миксин для добавления поля name в модель."""
 
     name = models.CharField(
         max_length=MAX_NAMES_LENGTH, verbose_name="Название"

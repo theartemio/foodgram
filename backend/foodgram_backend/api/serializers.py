@@ -8,7 +8,6 @@ from shoppinglist.models import Favorites, ShoppingCart
 
 from django.contrib.auth import get_user_model
 from foodgram_backend.fields import Base64ImageField
-from foodgram_backend.utils import get_image_url
 from rest_framework import serializers
  
 

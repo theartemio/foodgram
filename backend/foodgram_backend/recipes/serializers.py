@@ -1,6 +1,5 @@
 from .models import Recipe
 from foodgram_backend.fields import Base64ImageField
-from foodgram_backend.utils import get_image_url
 from rest_framework import serializers
 
 class RecipeSubscriptionsSerializer(serializers.ModelSerializer):
@@ -16,4 +15,3 @@ class RecipeSubscriptionsSerializer(serializers.ModelSerializer):
             "image",
             "cooking_time",
         )
-

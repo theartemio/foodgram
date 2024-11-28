@@ -3,17 +3,16 @@ from rest_framework.routers import DefaultRouter
 
 from .views import AvatarAPIView, CustomUserViewSet, SubscribeViewSet
 
-follows = SubscribeViewSet.as_view({
-    "get": "list",
-})
-subscribe = SubscribeViewSet.as_view({
-    "post": "create",
-    "delete": "destroy"
-}
+follows = SubscribeViewSet.as_view(
+    {
+        "get": "list",
+    }
 )
+subscribe = SubscribeViewSet.as_view({"post": "create", "delete": "destroy"})
 
 
 router = DefaultRouter()
+router.register("users", CustomUserViewSet, basename="customuser")
 
 
 urlpatterns = [
@@ -21,5 +20,5 @@ urlpatterns = [
     path("users/subscriptions/", follows, name="subscription_list"),
     path("users/<int:user_id>/subscribe/", subscribe),
     path("auth/", include("djoser.urls.authtoken")),
-    path("", include("djoser.urls")),
+    path("", include(router.urls)),
 ]

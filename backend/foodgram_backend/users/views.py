@@ -7,6 +7,7 @@ from rest_framework.mixins import CreateModelMixin, ListModelMixin
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
+from rest_framework.decorators import action
 
 from .models import CustomUser, Follow
 from .permissions import IsSameUserOrRestricted
@@ -17,6 +18,7 @@ User = get_user_model()
 
 
 class CustomUserViewSet(UserViewSet):
+    @action(["get", "put", "patch", "delete"], detail=False)
     def me(self, request, *args, **kwargs):
         if not request.user.is_authenticated:
             return Response(
