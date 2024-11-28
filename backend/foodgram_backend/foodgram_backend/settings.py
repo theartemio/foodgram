@@ -15,7 +15,7 @@ SECRET_KEY = 'django-insecure-hw49hxno!-um)gmig9#tvj(mk^b2dntrpqwr%dw-!k1523^n_^
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['84.201.153.136', 'superfoodgram3000.ddns.net']
+ALLOWED_HOSTS = ['84.201.153.136', '127.0.0.1', 'localhost', 'superfoodgram3000.ddns.net']
 
 
 # Application definition
