@@ -22,7 +22,7 @@ services:
     depends_on:
       - db
   frontend:
-    image: theartemio/foodgram_backend:latest
+    image: theartemio/foodgram_frontend:latest
     env_file: .env  
     command: cp -r /app/build/. /frontend_static/
     volumes:
