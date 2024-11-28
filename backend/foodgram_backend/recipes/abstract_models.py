@@ -1,5 +1,6 @@
 from django.db import models
-from foodgram_backend.constants import MAX_NAMES_LENGTH, MAX_SLUG_LENGTH
+
+from foodgram_backend.constants import MAX_NAMES_LENGTH
 
 
 class NameMixin(models.Model):

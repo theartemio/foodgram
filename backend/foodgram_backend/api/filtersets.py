@@ -29,7 +29,10 @@ class RecipeFilter(filters.FilterSet):
         fields = ("is_favorited", "is_in_shopping_cart", "tags", "author")
 
     def filter_is_favorited(self, queryset, name, value):
-        """Фильтрует рецепты в зависимости от того, добавлены ли они в избранное."""
+        """
+        Фильтрует рецепты в зависимости от того,
+        добавлены ли они в избранное.
+        """
         user = self.request.user
         if not user.is_authenticated:
             return queryset.none() if value else queryset
@@ -41,7 +44,10 @@ class RecipeFilter(filters.FilterSet):
         ).filter(is_favorited=value)
 
     def filter_is_in_shopping_cart(self, queryset, name, value):
-        """Фильтрует рецепты в зависимости от того, добавлены ли они в список покупок."""
+        """
+        Фильтрует рецепты в зависимости от того,
+        добавлены ли они в список покупок.
+        """
         user = self.request.user
         if not user.is_authenticated:
             return queryset.none() if value else queryset

@@ -4,6 +4,7 @@ from recipes.models import Recipe
 
 User = get_user_model()
 
+
 class UserRecipeListsAbstract(models.Model):
     """
     Абстрактная модель для создания M2M промежуточных моделей со списками

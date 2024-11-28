@@ -1,6 +1,7 @@
 from django.contrib.auth.models import (AbstractBaseUser, PermissionsMixin,
                                         UserManager)
 from django.db import models
+
 from foodgram_backend.constants import (CHOICES, MAX_EMAIL_LENGTH,
                                         MAX_ROLE_LENGTH, MAX_USER_NAMES_LENGTH,
                                         USER)
@@ -51,7 +52,11 @@ class CustomUser(AbstractBaseUser, PermissionsMixin):
     is_staff = models.BooleanField(default=False)
     is_active = models.BooleanField(default=True)
     USERNAME_FIELD = "email"
-    REQUIRED_FIELDS = ("username", "first_name", "last_name",)
+    REQUIRED_FIELDS = (
+        "username",
+        "first_name",
+        "last_name",
+    )
     objects = UserManager()
 
 

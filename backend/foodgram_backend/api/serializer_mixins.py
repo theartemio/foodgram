@@ -1,7 +1,8 @@
 from django.contrib.auth import get_user_model
-from foodgram_backend.utils import get_image_url
 from recipes.models import Recipe
 from rest_framework import serializers
+
+from foodgram_backend.utils import get_image_url
 
 User = get_user_model()
 
@@ -18,7 +19,7 @@ class UserRecipeListsMixin:
 
     user = serializers.PrimaryKeyRelatedField(queryset=User.objects.all())
     recipe = serializers.PrimaryKeyRelatedField(queryset=Recipe.objects.all())
-    
+
     def validate(self, data):
         """
         Проверяет что:

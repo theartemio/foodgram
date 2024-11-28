@@ -1,5 +1,7 @@
-from foodgram_backend.constants import ADMIN
 from rest_framework import permissions
+
+from foodgram_backend.constants import ADMIN
+
 
 class IsAuthorOrReadOnly(permissions.BasePermission):
     """Проверяет, что пользователь залогинен и он - автор записи."""
@@ -16,18 +18,22 @@ class IsAuthorOrReadOnly(permissions.BasePermission):
             or obj.author == request.user
         )
 
+
 class IsSameUserOrAdmin(permissions.BasePermission):
-    """Проверяет, что пользователь запрашивает записи о себе или является админом."""
+    """
+    Проверяет, что пользователь запрашивает записи
+    о себе или является админом.
+    """
 
     def has_permission(self, request, view):
         return True
 
     def has_object_permission(self, request, view, obj):
-        return (
-            request.user.is_authenticated and
-            (request.method in permissions.SAFE_METHODS
-            or request.user.role == ADMIN)
+        return request.user.is_authenticated and (
+            request.method in permissions.SAFE_METHODS
+            or request.user.role == ADMIN
         )
+
 
 class IsSameUserOrRestricted(permissions.BasePermission):
     """Проверяет, что пользователь залогинен и запрашивает записи о себе."""

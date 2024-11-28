@@ -5,43 +5,29 @@ from django_filters.rest_framework import DjangoFilterBackend
 from recipes.models import Ingredient, Recipe, ShortenedLinks, Tag
 from rest_framework import status, viewsets
 from rest_framework.authentication import TokenAuthentication
-from rest_framework.decorators import (
-    action,
-    api_view,
-    authentication_classes,
-    permission_classes,
-)
-from rest_framework.mixins import (
-    CreateModelMixin,
-    ListModelMixin,
-    RetrieveModelMixin,
-    UpdateModelMixin,
-)
+from rest_framework.decorators import (action, api_view,
+                                       authentication_classes,
+                                       permission_classes)
+from rest_framework.mixins import (CreateModelMixin, ListModelMixin,
+                                   RetrieveModelMixin, UpdateModelMixin)
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
-from userlists.models import UserIngredients
+from userlists.models import Favorites, ShoppingCart, UserIngredients
 from users.permissions import IsAuthorOrReadOnly
 
 from .filtersets import RecipeFilter
 from .mixins import NoPaginationMixin, SearchMixin
-from .serializers import (
-    IngredientSerializer,
-    RecipeAddingSerializer,
-    RecipeDetailSerializer,
-    RecipeIngredientSerializer,
-    TagSerializer,
-)
-
-from django.contrib.auth import get_user_model
-
-from userlists.models import Favorites, ShoppingCart
-from .serializers import FavoritesSerializer, ShoppingCartSerializer
+from .serializers import (FavoritesSerializer, IngredientSerializer,
+                          RecipeAddingSerializer, RecipeDetailSerializer,
+                          RecipeIngredientSerializer, ShoppingCartSerializer,
+                          TagSerializer)
 from .viewset_mixins import ManageUserListsViewSet
+
 
 # Вьюсеты для простых моделей
 class TagViewSet(
-    # UpdateModelMixin,
-    # CreateModelMixin,
+    UpdateModelMixin,  # Отключить
+    CreateModelMixin,  # Отключить
     NoPaginationMixin,
     RetrieveModelMixin,
     ListModelMixin,
