@@ -10,17 +10,19 @@ services:
   db:
     image: postgres:13.10
     env_file: .env
+    restart: on-failure
     volumes:
       - pg_data_production:/var/lib/postgresql/data
-  backend:
-    
+
+  backend:    
     image: theartemio/foodgram_backend:latest
     env_file: .env
+    depends_on:
+      - db
     volumes:
       - static_volume:/backend_static
       - media_volume:/app/media
-    depends_on:
-      - db
+
   frontend:
     image: theartemio/foodgram_frontend:latest
     env_file: .env  
