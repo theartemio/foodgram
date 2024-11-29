@@ -2,6 +2,8 @@ from django.contrib.auth import get_user_model
 from foodgram_backend.constants import MAX_NAMES_LENGTH
 from foodgram_backend.fields import Base64ImageField
 from foodgram_backend.utils import is_in_list
+from django.shortcuts import get_object_or_404
+
 from recipes.models import Ingredient, Recipe, RecipeIngredient, Tag
 from rest_framework import serializers
 from userlists.models import Favorites, ShoppingCart
@@ -43,6 +45,9 @@ class RecipeIngredientSerializer(serializers.ModelSerializer):
     к рецепту.
     """
 
+    id = serializers.IntegerField(source="ingredient_id.id")
+    amount = serializers.IntegerField()
+
     class Meta:
         fields = (
             "id",
@@ -50,18 +55,24 @@ class RecipeIngredientSerializer(serializers.ModelSerializer):
         )
         model = RecipeIngredient
 
+    def validate_id(self, value):
+        """Проверка существования ингредиента."""
+        if not Ingredient.objects.filter(id=value).exists():
+            raise serializers.ValidationError(
+                f"Ингредиент с ID {value} не существует."
+            )
+        return value
+
 
 # Сериализаторы для модели рецептов
 class RecipeAddingSerializer(serializers.ModelSerializer):
     """Сериализатор для добавления рецептов."""
 
-    ingredients = serializers.ListField(required=True)
+    ingredients = RecipeIngredientSerializer(many=True)
     tags = serializers.PrimaryKeyRelatedField(
         queryset=Tag.objects.all(),
         many=True,
         required=True,
-        allow_null=False,
-        allow_empty=False,
     )
     image = Base64ImageField(required=True, allow_null=True)
     author = serializers.SlugRelatedField(
@@ -83,30 +94,48 @@ class RecipeAddingSerializer(serializers.ModelSerializer):
         )
         read_only_fields = ("author",)
 
-    def validate_ingredients(self, value):
-        if not value:
-            raise serializers.ValidationError(
-                "Список ингредиентов не может быть пустым!"
-            )
-        keys = []
-        for ingredient in value:
-            id = ingredient["id"]
-            try:
-                ingredient = Ingredient.objects.get(id=id)
-            except Ingredient.DoesNotExist:
-                raise serializers.ValidationError("Ингредиент не найден!")
-            keys.append(id)
-        if len(keys) != len(set(keys)):
-            raise serializers.ValidationError(
-                "Ингредиенты не могут повторяться!"
-            )
-        return value
-
     def validate_tags(self, value):
         unique_tags = set(value)
         if len(value) != len(unique_tags):
             raise serializers.ValidationError("Теги не могут повторяться!")
         return value
+
+    def add_ingredients(self, recipe, ingredients_data):
+        """Добавление ингредиентов к рецепту."""
+        added_ingredient_ids = set()
+        for ingredient in ingredients_data:
+            ingredient_id = ingredient["ingredient_id"]["id"]
+            if ingredient_id in added_ingredient_ids:
+                raise serializers.ValidationError(
+                    f"Ингредиент с ID {ingredient_id} повторяется."
+                )
+            amount = ingredient["amount"]
+            added_ingredient_ids.add(ingredient_id)
+            RecipeIngredient.objects.create(
+                recipe=recipe, ingredient_id=ingredient_id, amount=amount
+            )
+
+    def create(self, validated_data):
+        """Создание рецепта"""
+        ingredients = validated_data.pop("ingredients")
+        tags = validated_data.pop("tags")
+        recipe = Recipe.objects.create(**validated_data)
+        self.add_ingredients(recipe, ingredients)
+        recipe.tags.set(tags)
+        return recipe
+
+    def update(self, instance, validated_data):  # Проверить
+        """Обновление рецепта."""
+        ingredients = validated_data.pop("ingredients", None)
+        tags = validated_data.pop("tags", None)
+        for attr, value in validated_data.items():
+            setattr(instance, attr, value)
+        if ingredients is not None:
+            self.add_ingredients(instance, ingredients)
+        if tags is not None:
+            instance.tags.set(tags)
+        instance.save()
+        return instance
 
 
 class RecipeDetailSerializer(serializers.ModelSerializer):

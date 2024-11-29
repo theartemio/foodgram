@@ -1,4 +1,4 @@
-from django.http import Http404, HttpResponse
+from django.http import HttpResponse
 from django.shortcuts import get_object_or_404
 from django.urls import reverse
 from django_filters.rest_framework import DjangoFilterBackend
@@ -19,7 +19,7 @@ from .filtersets import RecipeFilter
 from .mixins import NoPaginationMixin, SearchMixin
 from .serializers import (FavoritesSerializer, IngredientSerializer,
                           RecipeAddingSerializer, RecipeDetailSerializer,
-                          RecipeIngredientSerializer, ShoppingCartSerializer,
+                          ShoppingCartSerializer,
                           TagSerializer)
 from .viewset_mixins import ManageUserListsViewSet
 
@@ -117,79 +117,12 @@ class RecipeViewSet(
         raw_data = request.data
         serializer = self.serializer_class(data=raw_data)
         serializer.is_valid(raise_exception=True)
-        ingredient_list = serializer.validated_data.pop("ingredients")
         recipe = serializer.save(author=self.request.user)
-
-        if not ingredient_list:
-            return Response(
-                {"ingredients": "Список ингредиентов не может быть пустым!"},
-                status=status.HTTP_400_BAD_REQUEST,
-            )
-        # Вынести в функцию
-        for ingredient in ingredient_list:
-            ingredient_serializer = RecipeIngredientSerializer(data=ingredient)
-            ingredient_serializer.is_valid(raise_exception=True)
-            try:
-                current_ingredient = get_object_or_404(
-                    Ingredient, id=ingredient["id"]
-                )
-            except Http404:
-                return Response(
-                    {"error": "Ингредиент не найден!"},
-                    status=status.HTTP_400_BAD_REQUEST,
-                )
-
-            ingredient_serializer.save(
-                ingredient=current_ingredient, recipe=recipe
-            )
         serializer = RecipeDetailSerializer(
             recipe, context={"request": request}
         )
         return Response(serializer.data, status=status.HTTP_201_CREATED)
 
-    def update(self, request, *args, **kwargs):
-        partial = kwargs.pop("partial", False)
-        instance = self.get_object()
-        serializer = self.get_serializer(
-            instance, data=request.data, partial=partial
-        )
-        serializer.is_valid(raise_exception=True)
-
-        if "ingredients" not in serializer.validated_data.keys():
-            return Response(
-                {"error": "Поле ингредиенты обязательно!"},
-                status=status.HTTP_400_BAD_REQUEST,
-            )
-        if "tags" not in serializer.validated_data.keys():
-            return Response(
-                {"error": "Поле ингредиенты обязательно!"},
-                status=status.HTTP_400_BAD_REQUEST,
-            )
-        ingredient_list = serializer.validated_data.pop("ingredients")
-        recipe = serializer.save(author=self.request.user)
-        for ingredient in ingredient_list:
-            ingredient_serializer = RecipeIngredientSerializer(data=ingredient)
-            ingredient_serializer.is_valid(raise_exception=True)
-            try:
-                current_ingredient = get_object_or_404(
-                    Ingredient, id=ingredient["id"]
-                )
-            except Http404:
-                return Response(
-                    {"error": "Ингредиент не найден!"},
-                    status=status.HTTP_400_BAD_REQUEST,
-                )
-
-            ingredient_serializer.save(
-                ingredient=current_ingredient, recipe=recipe
-            )
-
-        self.perform_update(serializer)
-        serializer = RecipeDetailSerializer(
-            recipe, context={"request": request}
-        )
-
-        return Response(serializer.data)
 
     @action(detail=True, methods=["GET"], url_path="get-link")
     def get_link(self, request, pk):
