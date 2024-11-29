@@ -102,7 +102,7 @@ WSGI_APPLICATION = 'foodgram_backend.wsgi.application'
 
 # dev db
 
-
+"""
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.sqlite3',
@@ -125,7 +125,7 @@ DATABASES = {
     }
 }
 
-"""
+
 
 # User model settings
 AUTH_USER_MODEL = 'users.CustomUser'
