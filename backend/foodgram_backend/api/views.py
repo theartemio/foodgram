@@ -2,31 +2,24 @@ from django.http import HttpResponse
 from django.shortcuts import get_object_or_404
 from django.urls import reverse
 from django_filters.rest_framework import DjangoFilterBackend
-from recipes.models import Ingredient, Recipe, ShortenedLinks, Tag
-from rest_framework import status, viewsets, filters
+from rest_framework import filters, status, viewsets
 from rest_framework.authentication import TokenAuthentication
-from rest_framework.decorators import (
-    action,
-    api_view,
-    authentication_classes,
-    permission_classes,
-)
+from rest_framework.decorators import (action, api_view,
+                                       authentication_classes,
+                                       permission_classes)
 from rest_framework.mixins import ListModelMixin, RetrieveModelMixin
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
+
+from recipes.models import Ingredient, Recipe, ShortenedLinks, Tag
 from userlists.models import Favorites, ShoppingCart, UserIngredients
 from users.permissions import IsAuthorOrReadOnly
 
 from .filtersets import RecipeFilter
 from .mixins import NoPaginationMixin, SearchMixin
-from .serializers import (
-    FavoritesSerializer,
-    IngredientSerializer,
-    RecipeAddingSerializer,
-    RecipeDetailSerializer,
-    ShoppingCartSerializer,
-    TagSerializer,
-)
+from .serializers import (FavoritesSerializer, IngredientSerializer,
+                          RecipeAddingSerializer, RecipeDetailSerializer,
+                          ShoppingCartSerializer, TagSerializer)
 from .viewset_mixins import ManageUserListsViewSet
 
 

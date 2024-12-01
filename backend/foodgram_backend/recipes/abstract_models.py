@@ -1,4 +1,5 @@
 from django.db import models
+
 from foodgram_backend.constants import MAX_NAMES_LENGTH
 
 
