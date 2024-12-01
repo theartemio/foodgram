@@ -4,6 +4,9 @@ from recipes.models import Recipe
 from userlists.models import Favorites, ShoppingCart
 
 
+class FilterByName(filters.FilterSet):
+    
+
 class RecipeFilter(filters.FilterSet):
     """
     Фильтр для модели Recipe, позволяющий фильтровать добавленные рецепты.
