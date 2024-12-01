@@ -2,7 +2,6 @@ from django.http import HttpResponse
 from django.shortcuts import get_object_or_404
 from django.urls import reverse
 from django_filters.rest_framework import DjangoFilterBackend
-from recipes.models import Ingredient, Recipe, ShortenedLinks, Tag
 from rest_framework import status, viewsets
 from rest_framework.authentication import TokenAuthentication
 from rest_framework.decorators import (action, api_view,
@@ -12,6 +11,8 @@ from rest_framework.mixins import (CreateModelMixin, ListModelMixin,
                                    RetrieveModelMixin, UpdateModelMixin)
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
+
+from recipes.models import Ingredient, Recipe, ShortenedLinks, Tag
 from userlists.models import Favorites, ShoppingCart, UserIngredients
 from users.permissions import IsAuthorOrReadOnly
 
