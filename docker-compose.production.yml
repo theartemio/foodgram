@@ -22,9 +22,6 @@ services:
     volumes:
       - static_volume:/backend_static
       - media_volume:/app/media
-    environement:
-      - DJANGO_SUPERUSER_PASSWORD=$DJANGO_SUPERUSER_PASSWORD
-    command: python manage.py createsuperuser
 
   frontend:
     image: theartemio/foodgram_frontend:latest
