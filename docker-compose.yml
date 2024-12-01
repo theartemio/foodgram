@@ -31,10 +31,10 @@ services:
 
   gateway:
     build: ./gateway/
+    env_file: .env
     depends_on:
       - backend
       - db
-    env_file: .env
     volumes:
       - static:/staticfiles/
     ports:
