@@ -2,7 +2,6 @@ from django.http import HttpResponse
 from django.shortcuts import get_object_or_404
 from django.urls import reverse
 from django_filters.rest_framework import DjangoFilterBackend
-from recipes.models import Ingredient, Recipe, ShortenedLinks, Tag
 from rest_framework import status, viewsets
 from rest_framework.authentication import TokenAuthentication
 from rest_framework.decorators import (action, api_view,
@@ -12,6 +11,8 @@ from rest_framework.mixins import (CreateModelMixin, ListModelMixin,
                                    RetrieveModelMixin, UpdateModelMixin)
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
+
+from recipes.models import Ingredient, Recipe, ShortenedLinks, Tag
 from userlists.models import Favorites, ShoppingCart, UserIngredients
 from users.permissions import IsAuthorOrReadOnly
 
@@ -19,8 +20,7 @@ from .filtersets import RecipeFilter
 from .mixins import NoPaginationMixin, SearchMixin
 from .serializers import (FavoritesSerializer, IngredientSerializer,
                           RecipeAddingSerializer, RecipeDetailSerializer,
-                          ShoppingCartSerializer,
-                          TagSerializer)
+                          ShoppingCartSerializer, TagSerializer)
 from .viewset_mixins import ManageUserListsViewSet
 
 
@@ -122,7 +122,6 @@ class RecipeViewSet(
             recipe, context={"request": request}
         )
         return Response(serializer.data, status=status.HTTP_201_CREATED)
-
 
     @action(detail=True, methods=["GET"], url_path="get-link")
     def get_link(self, request, pk):
