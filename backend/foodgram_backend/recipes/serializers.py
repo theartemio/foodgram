@@ -1,6 +1,5 @@
-from rest_framework import serializers
-
 from foodgram_backend.fields import Base64ImageField
+from rest_framework import serializers
 
 from .models import Recipe
 
