@@ -22,7 +22,7 @@ class RecipeFilter(filters.FilterSet):
     is_in_shopping_cart = filters.BooleanFilter(
         method="filter_is_in_shopping_cart"
     )
-    tags = filters.BaseInFilter(field_name="tags__slug", lookup_expr="in")
+    tags = filters.CharFilter(method="filter_tags", lookup_expr="iexact")
 
     class Meta:
         model = Recipe
@@ -56,3 +56,12 @@ class RecipeFilter(filters.FilterSet):
                 ShoppingCart.objects.filter(user=user, recipe=OuterRef("pk"))
             )
         ).filter(is_in_shopping_cart=value)
+
+    def filter_tags(self, queryset, name, value):
+        """
+        Фильтрует рецепты по тегам.
+        """
+        tags = self.request.query_params.getlist("tags")
+        if tags:
+            return queryset.filter(tags__slug__in=tags).distinct()
+        return queryset
