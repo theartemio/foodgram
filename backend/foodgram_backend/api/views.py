@@ -157,7 +157,7 @@ class RecipeViewSet(
 @authentication_classes([TokenAuthentication])
 @permission_classes([IsAuthenticated])
 def download_shopping_list(request):
-    """Возвращает список покупок в виде списка в формате rtf."""
+    """Возвращает список покупок в виде списка в формате txt."""
     user = request.user
     users_ingredients = UserIngredients.objects.filter(user=user.id)
     formatted_lines = [
@@ -165,14 +165,12 @@ def download_shopping_list(request):
         for i in users_ingredients
     ]
     response_data = "\n".join(formatted_lines)
-    buffer = BytesIO()
-    buffer.write(response_data.encode("utf-8"))
-    buffer.seek(0)
+    filename = f"{user}_shopping_list.txt"
     response = HttpResponse(
-        buffer,
-        content_type="application/octet-stream",
+        formatted_lines,
+        content_type="text.txt; charset=utf-8",
     )
-    response["Content-Disposition"] = (
-        'attachment; filename="shopping-list.rtf"'
+    response_data["Content-Disposition"] = (
+        f'attachment; filename={filename}'
     )
     return response
