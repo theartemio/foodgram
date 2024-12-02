@@ -1,7 +1,7 @@
 from django.contrib import admin
 from django.db.models import Count
 
-from .models import Ingredient, Recipe, ShortenedLinks, Tag, RecipeIngredient
+from .models import Ingredient, Recipe, RecipeIngredient, ShortenedLinks, Tag
 
 
 class SearchAdminMixin:
