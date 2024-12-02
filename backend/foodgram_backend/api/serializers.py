@@ -106,7 +106,7 @@ class RecipeAddingSerializer(serializers.ModelSerializer):
         return value
 
     def add_ingredients(self, recipe, ingredients_data):
-        """Добавление ингредиентов к рецепту."""
+        """Описывает логику добавления ингредиентов к рецепту."""
         added_ingredient_ids = set()
         for ingredient in ingredients_data:
             ingredient_id = ingredient["ingredient_id"]["id"]
@@ -116,16 +116,14 @@ class RecipeAddingSerializer(serializers.ModelSerializer):
                 )
             amount = ingredient["amount"]
             added_ingredient_ids.add(ingredient_id)
-            recipe_ingredient, created = (
-                RecipeIngredient.objects.update_or_create(
-                    recipe=recipe,
-                    ingredient_id=ingredient_id,
-                    defaults={"amount": amount},
-                )
+            RecipeIngredient.objects.update_or_create(
+                recipe=recipe,
+                ingredient_id=ingredient_id,
+                defaults={"amount": amount},
             )
 
     def create(self, validated_data):
-        """Создание рецепта"""
+        """Создание рецепта."""
         ingredients = validated_data.pop("ingredients")
         tags = validated_data.pop("tags")
         recipe = Recipe.objects.create(**validated_data)
@@ -133,7 +131,7 @@ class RecipeAddingSerializer(serializers.ModelSerializer):
         recipe.tags.set(tags)
         return recipe
 
-    def update(self, instance, validated_data):  # Проверить
+    def update(self, instance, validated_data):
         """Обновление рецепта."""
         ingredients = validated_data.pop("ingredients")
         tags = validated_data.pop("tags")
@@ -153,9 +151,9 @@ class RecipeDetailSerializer(serializers.ModelSerializer):
     Ингредиенты, теги и автор передаются в виде объектов.
     Включает дополнительные поля:
         - is_favorited - поле для проверки того,
-        добавлен ли рецепт в список избранного
+        добавлен ли рецепт в список избранного.
         - is_in_shopping_cart - поле для проверки того,
-        добавлен ли рецепт в список покупок
+        добавлен ли рецепт в список покупок.
     """
 
     ingredients = IngredientSerializer(many=True)

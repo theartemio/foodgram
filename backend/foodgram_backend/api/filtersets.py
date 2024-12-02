@@ -15,7 +15,6 @@ class RecipeFilter(filters.FilterSet):
         - tags - фильтрация по тегу через slug, доступна фильтрация по
         множеству тегов, переданных в одном запросе.
         - author - фильтрция по автору через id автора
-
     """
 
     is_favorited = filters.BooleanFilter(method="filter_is_favorited")

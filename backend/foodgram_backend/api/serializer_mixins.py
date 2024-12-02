@@ -25,7 +25,6 @@ class UserRecipeListsMixin:
         Проверяет, существует ли рецепт с данным ID.
         """
         if not Recipe.objects.filter(pk=value.id).exists():
-            print("lol")
             raise Http404(f"Рецепт с ID {value.id} не найден.")
         return value
 
