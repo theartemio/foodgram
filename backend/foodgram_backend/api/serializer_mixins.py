@@ -1,9 +1,9 @@
 from django.contrib.auth import get_user_model
 from django.http import Http404
-from recipes.models import Recipe
 from rest_framework import serializers
 
 from foodgram_backend.utils import get_image_url
+from recipes.models import Recipe
 
 User = get_user_model()
 

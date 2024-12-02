@@ -1,12 +1,12 @@
 from django.contrib.auth import get_user_model
-from recipes.models import Ingredient, Recipe, RecipeIngredient, Tag
 from rest_framework import serializers
-from userlists.models import Favorites, ShoppingCart
-from users.serializers import CustomUserSerializer
 
 from foodgram_backend.constants import MAX_NAMES_LENGTH
 from foodgram_backend.fields import Base64ImageField
 from foodgram_backend.utils import is_in_list
+from recipes.models import Ingredient, Recipe, RecipeIngredient, Tag
+from userlists.models import Favorites, ShoppingCart
+from users.serializers import CustomUserSerializer
 
 from .serializer_mixins import UserRecipeListsMixin
 
