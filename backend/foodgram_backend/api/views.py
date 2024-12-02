@@ -1,3 +1,5 @@
+from io import BytesIO
+
 from django.http import HttpResponse
 from django.shortcuts import get_object_or_404
 from django.urls import reverse
@@ -163,12 +165,14 @@ def download_shopping_list(request):
         for i in users_ingredients
     ]
     response_data = "\n".join(formatted_lines)
-
+    buffer = BytesIO()
+    buffer.write(response_data.encode("utf-8"))
+    buffer.seek(0)
     response = HttpResponse(
-        response_data,
-        headers={
-            "Content-Type": "text/rtf",
-            "Content-Disposition": 'attachment; filename="list.rtf"',
-        },
+        buffer,
+        content_type="application/octet-stream",
+    )
+    response["Content-Disposition"] = (
+        'attachment; filename="shopping-list.rtf"'
     )
     return response
