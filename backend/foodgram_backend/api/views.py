@@ -1,4 +1,4 @@
-from django.http import HttpResponse
+from django.http import FileResponse
 from django.shortcuts import get_object_or_404
 from django.urls import reverse
 from django_filters.rest_framework import DjangoFilterBackend
@@ -157,9 +157,9 @@ class RecipeViewSet(
         filename = f"{user}_shopping_list.txt"
         response_file = form_shopping_list(user)
         filename = f"{user}_shopping_list.txt"
-        response = HttpResponse(
+        response = FileResponse(
             response_file,
-            content_type="text.txt; charset=utf-8",
+            as_attachment=True,
+            filename=filename
         )
-        response["Content-Disposition"] = f"attachment; filename={filename}"
         return response
