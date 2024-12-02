@@ -4,10 +4,7 @@ from django.urls import reverse
 from django_filters.rest_framework import DjangoFilterBackend
 from recipes.models import Ingredient, Recipe, ShortenedLinks, Tag
 from rest_framework import filters, status, viewsets
-from rest_framework.authentication import TokenAuthentication
-from rest_framework.decorators import (action, api_view,
-                                       authentication_classes,
-                                       permission_classes)
+from rest_framework.decorators import action
 from rest_framework.mixins import ListModelMixin, RetrieveModelMixin
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
@@ -150,25 +147,29 @@ class RecipeViewSet(
         )
         return response
 
-
-@api_view(["GET"])
-@authentication_classes([TokenAuthentication])
-@permission_classes([IsAuthenticated])
-def download_shopping_list(request):
-    """Возвращает список покупок в виде списка в формате txt."""
-    user = request.user
-    users_ingredients = UserIngredients.objects.filter(user=user.id)
-    formatted_lines = [
-        f"{i.ingredient.name}, ({i.ingredient.measurement_unit}) - {i.total}"
-        for i in users_ingredients
-    ]
-    response_data = "\n".join(formatted_lines)
-    filename = f"{user}_shopping_list.txt"
-    response = HttpResponse(
-        formatted_lines,
-        content_type="text.txt; charset=utf-8",
+    @action(
+        detail=False, methods=("get",), permission_classes=(IsAuthenticated,)
     )
-    response_data["Content-Disposition"] = (
-        f'attachment; filename={filename}'
-    )
-    return response
+    def download_shopping_cart(self, request):
+        """Возвращает список покупок в виде списка в формате txt."""
+        user = self.request.user
+        users_ingredients = UserIngredients.objects.filter(user=user.id)
+        file_data = [
+            f"Список покупок пользователя {user}",
+        ]
+        ingredient_lines = []
+        for ingredient in users_ingredients:
+            name = ingredient.ingredient.name
+            unit = ingredient.ingredient.measurement_unit
+            total = ingredient.total
+            line = f"{name}, ({unit}) - {total}"
+            ingredient_lines.append(line)
+        formatted_lines = file_data + ingredient_lines
+        response_data = "\n".join(formatted_lines)
+        filename = f"{user}_shopping_list.txt"
+        response = HttpResponse(
+            response_data,
+            content_type="text.txt; charset=utf-8",
+        )
+        response["Content-Disposition"] = f"attachment; filename={filename}"
+        return response
