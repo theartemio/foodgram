@@ -1,4 +1,5 @@
 from recipes.models import RecipeIngredient
+from userlists.models import UserIngredients
 
 
 def get_image_url(instance):
@@ -76,3 +77,19 @@ def upgrade_ingredient_list(ingredients, user, model, adding=True):
                 ingredient_id=ingredient_id,
                 total=ingredient_amount,
             )
+
+
+def form_shopping_list(user):
+    """Формирует список покупок для отправки в файле."""
+    users_ingredients = UserIngredients.objects.filter(user=user.id)
+    ingredient_lines = [
+        f"Список покупок пользователя {user}",
+    ]
+    for ingredient in users_ingredients:
+        name = ingredient.ingredient.name
+        unit = ingredient.ingredient.measurement_unit
+        total = ingredient.total
+        line = f"{name}, ({unit}) - {total}"
+        ingredient_lines.append(line)
+    response_data = "\n".join(ingredient_lines)
+    return response_data

@@ -2,13 +2,14 @@ from django.http import HttpResponse
 from django.shortcuts import get_object_or_404
 from django.urls import reverse
 from django_filters.rest_framework import DjangoFilterBackend
+from foodgram_backend.utils import form_shopping_list
 from recipes.models import Ingredient, Recipe, ShortenedLinks, Tag
 from rest_framework import filters, status, viewsets
 from rest_framework.decorators import action
 from rest_framework.mixins import ListModelMixin, RetrieveModelMixin
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
-from userlists.models import Favorites, ShoppingCart, UserIngredients
+from userlists.models import Favorites, ShoppingCart
 from users.permissions import IsAuthorOrReadOnly
 
 from .filtersets import RecipeFilter
@@ -153,22 +154,11 @@ class RecipeViewSet(
     def download_shopping_cart(self, request):
         """Возвращает список покупок в виде списка в формате txt."""
         user = self.request.user
-        users_ingredients = UserIngredients.objects.filter(user=user.id)
-        file_data = [
-            f"Список покупок пользователя {user}",
-        ]
-        ingredient_lines = []
-        for ingredient in users_ingredients:
-            name = ingredient.ingredient.name
-            unit = ingredient.ingredient.measurement_unit
-            total = ingredient.total
-            line = f"{name}, ({unit}) - {total}"
-            ingredient_lines.append(line)
-        formatted_lines = file_data + ingredient_lines
-        response_data = "\n".join(formatted_lines)
+        filename = f"{user}_shopping_list.txt"
+        response_file = form_shopping_list(user)
         filename = f"{user}_shopping_list.txt"
         response = HttpResponse(
-            response_data,
+            response_file,
             content_type="text.txt; charset=utf-8",
         )
         response["Content-Disposition"] = f"attachment; filename={filename}"
