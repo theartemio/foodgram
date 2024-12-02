@@ -61,16 +61,23 @@ class RecipeIngredientSerializer(serializers.ModelSerializer):
             )
         return value
 
+    def validate_amount(self, value):
+        if value < 1:
+            raise serializers.ValidationError(
+                "Количество ингдериента не может быть меньше 1!"
+            )
+        return value
+
 
 # Сериализаторы для модели рецептов
 class RecipeAddingSerializer(serializers.ModelSerializer):
     """Сериализатор для добавления рецептов."""
 
-    ingredients = RecipeIngredientSerializer(many=True)
+    ingredients = RecipeIngredientSerializer(
+        many=True, required=True, allow_empty=False
+    )
     tags = serializers.PrimaryKeyRelatedField(
-        queryset=Tag.objects.all(),
-        many=True,
-        required=True,
+        queryset=Tag.objects.all(), many=True, required=True, allow_empty=False
     )
     image = Base64ImageField(required=True, allow_null=True)
     author = serializers.SlugRelatedField(
@@ -109,8 +116,12 @@ class RecipeAddingSerializer(serializers.ModelSerializer):
                 )
             amount = ingredient["amount"]
             added_ingredient_ids.add(ingredient_id)
-            RecipeIngredient.objects.create(
-                recipe=recipe, ingredient_id=ingredient_id, amount=amount
+            recipe_ingredient, created = (
+                RecipeIngredient.objects.update_or_create(
+                    recipe=recipe,
+                    ingredient_id=ingredient_id,
+                    defaults={"amount": amount},
+                )
             )
 
     def create(self, validated_data):
@@ -124,8 +135,8 @@ class RecipeAddingSerializer(serializers.ModelSerializer):
 
     def update(self, instance, validated_data):  # Проверить
         """Обновление рецепта."""
-        ingredients = validated_data.pop("ingredients", None)
-        tags = validated_data.pop("tags", None)
+        ingredients = validated_data.pop("ingredients")
+        tags = validated_data.pop("tags")
         for attr, value in validated_data.items():
             setattr(instance, attr, value)
         if ingredients is not None:

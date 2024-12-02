@@ -5,6 +5,7 @@ from rest_framework import status, viewsets
 from rest_framework.mixins import CreateModelMixin
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
+from recipes.models import Recipe
 
 User = get_user_model()
 
@@ -29,6 +30,7 @@ class ManageUserListsViewSet(
     def create(self, request, *args, **kwargs):
         """Добавляет рецепт в список по переданному id"""
         recipe_id = self.get_recipe_id()
+        get_object_or_404(Recipe, id=recipe_id)
         user = self.request.user.id
         data = {
             "user": user,
@@ -45,6 +47,7 @@ class ManageUserListsViewSet(
     def destroy(self, request, *args, **kwargs):
         """Удаляет рецепт из списка по переданному id"""
         recipe_id = self.get_recipe_id()
+        get_object_or_404(Recipe, id=recipe_id)
         user = self.request.user.id
         queryset = self.get_queryset()
         try:

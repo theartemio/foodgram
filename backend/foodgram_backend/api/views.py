@@ -5,9 +5,12 @@ from django_filters.rest_framework import DjangoFilterBackend
 from recipes.models import Ingredient, Recipe, ShortenedLinks, Tag
 from rest_framework import filters, status, viewsets
 from rest_framework.authentication import TokenAuthentication
-from rest_framework.decorators import (action, api_view,
-                                       authentication_classes,
-                                       permission_classes)
+from rest_framework.decorators import (
+    action,
+    api_view,
+    authentication_classes,
+    permission_classes,
+)
 from rest_framework.mixins import ListModelMixin, RetrieveModelMixin
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
@@ -16,9 +19,14 @@ from users.permissions import IsAuthorOrReadOnly
 
 from .filtersets import RecipeFilter
 from .mixins import NoPaginationMixin, SearchMixin
-from .serializers import (FavoritesSerializer, IngredientSerializer,
-                          RecipeAddingSerializer, RecipeDetailSerializer,
-                          ShoppingCartSerializer, TagSerializer)
+from .serializers import (
+    FavoritesSerializer,
+    IngredientSerializer,
+    RecipeAddingSerializer,
+    RecipeDetailSerializer,
+    ShoppingCartSerializer,
+    TagSerializer,
+)
 from .viewset_mixins import ManageUserListsViewSet
 
 
@@ -119,6 +127,20 @@ class RecipeViewSet(
             recipe, context={"request": request}
         )
         return Response(serializer.data, status=status.HTTP_201_CREATED)
+
+    def partial_update(self, request, *args, **kwargs):
+        """Разрешает PATCH запросы только при передаче полных данных."""
+        kwargs.pop("partial", False)
+        instance = self.get_object()
+        serializer = self.get_serializer(
+            instance, data=request.data, partial=False
+        )
+        serializer.is_valid(raise_exception=True)
+        self.perform_update(serializer)
+        serializer = RecipeDetailSerializer(
+            instance, context={"request": request}
+        )
+        return Response(serializer.data, status=status.HTTP_200_OK)
 
     @action(detail=True, methods=["GET"], url_path="get-link")
     def get_link(self, request, pk):

@@ -128,6 +128,7 @@ class SubscribeViewSet(
     def destroy(self, request, *args, **kwargs):
         """Удаляет подписку из списка по переданному id"""
         following_id = self.get_user_id()
+        get_object_or_404(User, id=following_id)
         user_id = self.request.user.id
         try:
             instance = get_object_or_404(

@@ -2,6 +2,7 @@ from django.contrib.auth import get_user_model
 from foodgram_backend.utils import get_image_url
 from recipes.models import Recipe
 from rest_framework import serializers
+from django.http import Http404
 
 User = get_user_model()
 
@@ -18,6 +19,15 @@ class UserRecipeListsMixin:
 
     user = serializers.PrimaryKeyRelatedField(queryset=User.objects.all())
     recipe = serializers.PrimaryKeyRelatedField(queryset=Recipe.objects.all())
+
+    def validate_recipe(self, value):
+        """
+        Проверяет, существует ли рецепт с данным ID.
+        """
+        if not Recipe.objects.filter(pk=value.id).exists():
+            print("lol")
+            raise Http404(f"Рецепт с ID {value.id} не найден.")
+        return value
 
     def validate(self, data):
         """

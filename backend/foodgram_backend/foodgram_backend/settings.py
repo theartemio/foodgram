@@ -70,8 +70,8 @@ DJOSER = {
         'user': 'users.serializers.CustomUserSerializer',
     },
     'PERMISSIONS': {
-        'user': ['users.permissions.IsSameUserOrAdmin'],
-        'user_list': ['users.permissions.IsSameUserOrAdmin'],
+        'user': ['rest_framework.permissions.AllowAny'],
+        'user_list': ['rest_framework.permissions.AllowAny'],
     },
     'HIDE_USERS': False
 }
@@ -80,19 +80,12 @@ WSGI_APPLICATION = 'foodgram_backend.wsgi.application'
 
 
 # Database
-# dev db
-
-
-"""
-DATABASES = {
+"""DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.sqlite3',
         'NAME': BASE_DIR / 'db.sqlite3',
     }
-}
-
-"""
-
+}"""
 
 # postgresql
 DATABASES = {
@@ -105,8 +98,6 @@ DATABASES = {
         'PORT': os.getenv('DB_PORT', 5432)
     }
 }
-
-
 
 # User model settings
 AUTH_USER_MODEL = 'users.CustomUser'
