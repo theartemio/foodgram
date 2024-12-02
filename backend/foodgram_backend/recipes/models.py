@@ -4,7 +4,6 @@ import string
 from django.contrib.auth import get_user_model
 from django.core.validators import MinValueValidator
 from django.db import models
-
 from foodgram_backend.constants import (MAX_NAMES_LENGTH, MAX_SHORT_LINK_CODE,
                                         MAX_SLUG_LENGTH)
 
