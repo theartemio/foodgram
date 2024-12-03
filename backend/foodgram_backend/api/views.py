@@ -154,12 +154,10 @@ class RecipeViewSet(
     def download_shopping_cart(self, request):
         """Возвращает список покупок в виде списка в формате txt."""
         user = self.request.user
-        filename = f"{user}_shopping_list.txt"
         response_file = form_shopping_list(user)
-        filename = f"{user}_shopping_list.txt"
         response = FileResponse(
             response_file,
             as_attachment=True,
-            filename=filename
+            filename=f"{user}_shopping_list.txt"
         )
         return response
