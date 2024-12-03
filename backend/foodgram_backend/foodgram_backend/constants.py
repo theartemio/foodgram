@@ -33,3 +33,6 @@ CHOICES = (
     (USER, USER),
     (ADMIN, ADMIN),
 )
+
+# Domain for shortened links
+DOMAIN = "https://superfoodgram3000.ddns.net/"

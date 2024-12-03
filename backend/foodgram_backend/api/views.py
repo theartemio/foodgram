@@ -3,6 +3,7 @@ from django.shortcuts import get_object_or_404
 from django.urls import reverse
 from django_filters.rest_framework import DjangoFilterBackend
 from foodgram_backend.utils import form_shopping_list
+from foodgram_backend.constants import DOMAIN
 from recipes.models import Ingredient, Recipe, ShortenedLinks, Tag
 from rest_framework import filters, status, viewsets
 from rest_framework.decorators import action
@@ -18,6 +19,7 @@ from .serializers import (FavoritesSerializer, IngredientSerializer,
                           RecipeAddingSerializer, RecipeDetailSerializer,
                           ShoppingCartSerializer, TagSerializer)
 from .viewset_mixins import ManageUserListsViewSet
+
 
 
 # Вьюсеты для простых моделей
@@ -136,6 +138,7 @@ class RecipeViewSet(
     def get_link(self, request, pk):
         """Создает постоянную короткую ссылку для рецепта."""
         long_url = request.get_full_path().replace("get-link/", "")
+        long_url.replace("api/", DOMAIN)
         url, created = ShortenedLinks.objects.get_or_create(
             original_url=long_url
         )
