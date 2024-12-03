@@ -2,8 +2,8 @@ from django.http import FileResponse
 from django.shortcuts import get_object_or_404
 from django.urls import reverse
 from django_filters.rest_framework import DjangoFilterBackend
-from foodgram_backend.utils import form_shopping_list
 from foodgram_backend.constants import DOMAIN
+from foodgram_backend.utils import form_shopping_list
 from recipes.models import Ingredient, Recipe, ShortenedLinks, Tag
 from rest_framework import filters, status, viewsets
 from rest_framework.decorators import action
@@ -19,7 +19,6 @@ from .serializers import (FavoritesSerializer, IngredientSerializer,
                           RecipeAddingSerializer, RecipeDetailSerializer,
                           ShoppingCartSerializer, TagSerializer)
 from .viewset_mixins import ManageUserListsViewSet
-
 
 
 # Вьюсеты для простых моделей
