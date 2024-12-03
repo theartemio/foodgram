@@ -136,8 +136,8 @@ class RecipeViewSet(
     @action(detail=True, methods=["GET"], url_path="get-link")
     def get_link(self, request, pk):
         """Создает постоянную короткую ссылку для рецепта."""
-        long_url = request.get_full_path().replace("get-link/", "")
-        long_url.replace("api/", DOMAIN)
+        long_url_parts = [DOMAIN, pk]
+        long_url = "".join(long_url_parts)
         url, created = ShortenedLinks.objects.get_or_create(
             original_url=long_url
         )
