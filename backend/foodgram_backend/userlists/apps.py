@@ -6,4 +6,4 @@ class UserlistsConfig(AppConfig):
     name = 'userlists'
 
     def ready(self):
-        from . import signals
+        from . import signals # noqa
