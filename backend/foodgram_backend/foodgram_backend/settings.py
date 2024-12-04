@@ -36,6 +36,7 @@ INSTALLED_APPS = [
     "django_filters",
     "api.apps.ApiConfig",
     "drf_extra_fields",
+    "psycopg2-binary",
     "users.apps.UsersConfig",
     "recipes.apps.RecipesConfig",
     "userlists.apps.UserlistsConfig",
@@ -86,7 +87,7 @@ DJOSER = {
 
 WSGI_APPLICATION = "foodgram_backend.wsgi.application"
 
-# Database
+# Databases
 DATABASES = {
     "default": {
         "ENGINE": "django.db.backends.postgresql",
@@ -97,7 +98,14 @@ DATABASES = {
         "PORT": os.getenv("DB_PORT", 5432),
     }
 }
-
+"""
+DATABASES = {
+    'default': {
+        'ENGINE': 'django.db.backends.sqlite3',
+        'NAME': BASE_DIR / 'db.sqlite3',
+    }
+}
+"""
 
 # User model settings
 AUTH_USER_MODEL = "users.CustomUser"
