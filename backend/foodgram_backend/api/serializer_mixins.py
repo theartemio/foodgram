@@ -1,8 +1,7 @@
 from django.http import Http404
 from foodgram_backend.utils import get_image_url
-from recipes.models import Recipe
+from recipes.models import Recipe, User
 from rest_framework import serializers
-from recipes.models import User
 
 
 class UserRecipeListsMixin:

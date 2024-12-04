@@ -1,3 +1,4 @@
+from django.db import transaction
 from foodgram_backend.constants import MAX_NAMES_LENGTH
 from foodgram_backend.fields import Base64ImageField
 from foodgram_backend.utils import is_in_list
@@ -5,9 +6,8 @@ from recipes.models import Ingredient, Recipe, RecipeIngredient, Tag
 from rest_framework import serializers
 from userlists.models import Favorites, ShoppingCart
 from users.serializers import CustomUserSerializer
-from django.db import transaction
-from .serializer_mixins import UserRecipeListsMixin
 
+from .serializer_mixins import UserRecipeListsMixin
 
 
 class TagSerializer(serializers.ModelSerializer):
@@ -113,7 +113,7 @@ class RecipeAddingSerializer(serializers.ModelSerializer):
                 )
             amount = ingredient["amount"]
             added_ingredient_ids.add(ingredient_id)
-            RecipeIngredient.objects.update_or_create( # Применить Bulk create
+            RecipeIngredient.objects.update_or_create(  # Применить Bulk create
                 recipe=recipe,
                 ingredient_id=ingredient_id,
                 defaults={"amount": amount},
