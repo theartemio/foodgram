@@ -44,12 +44,10 @@ class UserIngredients(models.Model):
     user = models.ForeignKey(
         User,
         on_delete=models.CASCADE,
-        null=False,
     )
     ingredient = models.ForeignKey(
         Ingredient,
         on_delete=models.CASCADE,
-        null=False,
     )
     total = models.PositiveSmallIntegerField()
 

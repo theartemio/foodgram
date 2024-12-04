@@ -14,7 +14,6 @@ class UserRecipeListsAbstract(models.Model):
     recipe = models.ForeignKey(
         Recipe,
         on_delete=models.CASCADE,
-        null=False,
         related_name="%(app_label)s_%(class)s_list",
         verbose_name="Рецепт",
         help_text="Id рецепта, добавленного в список.",
@@ -22,7 +21,6 @@ class UserRecipeListsAbstract(models.Model):
     user = models.ForeignKey(
         User,
         on_delete=models.CASCADE,
-        null=False,
         related_name="%(app_label)s_%(class)s_owner",
         verbose_name="Пользователь",
         help_text="Id пользователя, добавившего рецепт в список.",

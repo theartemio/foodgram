@@ -1,4 +1,3 @@
-from django.contrib.auth import get_user_model
 from foodgram_backend.constants import MAX_NAMES_LENGTH
 from foodgram_backend.fields import Base64ImageField
 from foodgram_backend.utils import is_in_list
@@ -6,10 +5,9 @@ from recipes.models import Ingredient, Recipe, RecipeIngredient, Tag
 from rest_framework import serializers
 from userlists.models import Favorites, ShoppingCart
 from users.serializers import CustomUserSerializer
-
+from django.db import transaction
 from .serializer_mixins import UserRecipeListsMixin
 
-User = get_user_model()
 
 
 class TagSerializer(serializers.ModelSerializer):
@@ -69,7 +67,6 @@ class RecipeIngredientSerializer(serializers.ModelSerializer):
         return value
 
 
-# Сериализаторы для модели рецептов
 class RecipeAddingSerializer(serializers.ModelSerializer):
     """Сериализатор для добавления рецептов."""
 
@@ -116,12 +113,13 @@ class RecipeAddingSerializer(serializers.ModelSerializer):
                 )
             amount = ingredient["amount"]
             added_ingredient_ids.add(ingredient_id)
-            RecipeIngredient.objects.update_or_create(
+            RecipeIngredient.objects.update_or_create( # Применить Bulk create
                 recipe=recipe,
                 ingredient_id=ingredient_id,
                 defaults={"amount": amount},
             )
 
+    @transaction.atomic
     def create(self, validated_data):
         """Создание рецепта."""
         ingredients = validated_data.pop("ingredients")
@@ -131,6 +129,7 @@ class RecipeAddingSerializer(serializers.ModelSerializer):
         recipe.tags.set(tags)
         return recipe
 
+    @transaction.atomic
     def update(self, instance, validated_data):
         """Обновление рецепта."""
         ingredients = validated_data.pop("ingredients")
@@ -208,7 +207,6 @@ class RecipeDetailSerializer(serializers.ModelSerializer):
         return data
 
 
-# Сериализаторы пользовательских списков
 class FavoritesSerializer(UserRecipeListsMixin, serializers.ModelSerializer):
     """
     Сериализатор для составления списка избранного.

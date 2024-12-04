@@ -5,7 +5,7 @@ from django.contrib.auth import get_user_model
 from django.core.validators import MinValueValidator
 from django.db import models
 from foodgram_backend.constants import (MAX_NAMES_LENGTH, MAX_SHORT_LINK_CODE,
-                                        MAX_SLUG_LENGTH)
+                                        MAX_SLUG_LENGTH, MIN_COOK_TIME)
 
 from .abstract_models import NameMixin
 
@@ -64,8 +64,6 @@ class Recipe(models.Model):
     )
     name = models.CharField(
         max_length=MAX_NAMES_LENGTH,
-        blank=False,
-        null=False,
         verbose_name="Название",
         help_text="Название рецепта.",
     )
@@ -77,13 +75,11 @@ class Recipe(models.Model):
         help_text="Картинка, иллюстрирующая рецепт.",
     )
     text = models.TextField(
-        blank=False,
-        null=False,
         verbose_name="Описание",
         help_text="Подробное описание рецепта.",
     )
     cooking_time = models.PositiveSmallIntegerField(
-        validators=(MinValueValidator(1),),
+        validators=(MinValueValidator(MIN_COOK_TIME, message=f"Время приготовления не может быть меньше {MIN_COOK_TIME}!"),),
         verbose_name="Время приготовления",
         help_text="Время приготовления в минутах.",
     )
@@ -91,7 +87,6 @@ class Recipe(models.Model):
         Tag,
         related_name="tags",
         null=True,
-        blank=False,
         verbose_name="Теги",
         help_text=(
             "Теги, к которым относится рецепт.",

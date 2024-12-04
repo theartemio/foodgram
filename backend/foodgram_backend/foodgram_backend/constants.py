@@ -5,8 +5,12 @@ MAX_SHORT_LINK_CODE = 3
 
 # Maximum length for recipe, ingredient and tag names
 MAX_NAMES_LENGTH = 256
+
 # Maximum length for slugs
 MAX_SLUG_LENGTH = 150
+
+# Minimum cooking time
+MIN_COOK_TIME = 1
 
 # User constants
 

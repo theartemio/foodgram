@@ -16,19 +16,19 @@ class IngredientInline(admin.StackedInline):
     model = RecipeIngredient
     extra = 0
 
-
+@admin.register(Tag) 
 class TagAdmin(SearchAdminMixin, admin.ModelAdmin):
     list_display = ("name", "slug")
     list_editable = ("slug",)
     list_display_links = ("name",)
 
-
+@admin.register(Ingredient)
 class IngredientAdmin(SearchAdminMixin, admin.ModelAdmin):
     list_display = ("name", "measurement_unit")
     list_editable = ("measurement_unit",)
     list_display_links = ("name",)
 
-
+@admin.register(Recipe)
 class RecipeAdmin(admin.ModelAdmin):
     list_display = (
         "id",
@@ -58,12 +58,5 @@ class RecipeAdmin(admin.ModelAdmin):
             faves_count=Count("userlists_favorites_list")
         )
         return queryset
-
-
-admin.site.register(Tag, TagAdmin)
-
-admin.site.register(Ingredient, IngredientAdmin)
-
-admin.site.register(Recipe, RecipeAdmin)
 
 admin.site.register(ShortenedLinks)
