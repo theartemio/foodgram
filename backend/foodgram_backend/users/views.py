@@ -144,13 +144,3 @@ class SubscribeViewSet(
             {"detail": "Подписка удалена."},
             status=status.HTTP_204_NO_CONTENT,
         )
-
-    def get_serializer_context(self):
-        """Лимит рецептов."""
-        context = super().get_serializer_context()
-        recipes_limit = self.request.query_params.get("recipes_limit")
-        if recipes_limit and recipes_limit.isdigit():
-            context["recipes_limit"] = int(recipes_limit)
-        else:
-            context["recipes_limit"] = None
-        return context

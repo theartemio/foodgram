@@ -1,9 +1,10 @@
 from django.contrib.auth import get_user_model
 from djoser.serializers import UserCreateSerializer, UserSerializer
-from foodgram_backend.fields import Base64ImageField
+from drf_extra_fields.fields import Base64ImageField
+from rest_framework import serializers
+
 from foodgram_backend.utils import get_image_url
 from recipes.serializers import RecipeSubscriptionsSerializer
-from rest_framework import serializers
 
 from .mixins import ValidateUsernameMixin
 from .models import Follow
@@ -82,13 +83,18 @@ class SubscriptionsUsersSerializer(UserSerializer):
         subscribed = Follow.objects.filter(user=user, following=obj).exists()
         return subscribed
 
-    def get_recipes(self, obj):
+    def to_representation(self, instance):
         """Возвращает количество рецептов в соответствии с recipes_limit"""
-        limit = self.context.get("recipes_limit")
-        recipes_qs = obj.recipes.all()
-        if limit is not None:
-            recipes_qs = recipes_qs[:limit]
-        return RecipeSubscriptionsSerializer(recipes_qs, many=True).data
+        data = super(SubscriptionsUsersSerializer, self).to_representation(
+            instance
+        )
+        request = self.context["request"]
+        limit = request.query_params.get("recipes_limit")
+        if limit:
+            recipes = data.pop("recipes")
+            limited_recipes = recipes[: int(limit)]
+            data["recipes"] = limited_recipes
+        return data
 
     def get_recipes_count(self, obj):
         """Считает рецепты."""
@@ -138,8 +144,10 @@ class FollowSerializer(serializers.ModelSerializer):
         """
         user = self.context["request"].user
         if data["following"] == user:
-            err_message = ("Мы любим чревоугодие, а не тщеславие.",
-                           "Не подписывайтесь на самого себя!")
+            err_message = (
+                "Мы любим чревоугодие, а не тщеславие.",
+                "Не подписывайтесь на самого себя!",
+            )
             raise serializers.ValidationError(err_message)
         if Follow.objects.filter(
             user=user, following=data["following"]

@@ -1,11 +1,11 @@
 from django.contrib.auth import get_user_model
-from django.http import Http404
 from django.shortcuts import get_object_or_404
-from recipes.models import Recipe
 from rest_framework import status, viewsets
 from rest_framework.mixins import CreateModelMixin
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
+
+from recipes.models import Recipe
 
 User = get_user_model()
 
@@ -50,17 +50,13 @@ class ManageUserListsViewSet(
         get_object_or_404(Recipe, id=recipe_id)
         user = self.request.user.id
         queryset = self.get_queryset()
-        try:
-            instance = get_object_or_404(
-                queryset, user=user, recipe_id=recipe_id
-            )
-        except Http404:
+        if queryset.filter(user=user, recipe_id=recipe_id).exists():
+            queryset.filter(user=user, recipe_id=recipe_id).delete()
             return Response(
-                {"error": "Такого рецепта в списке нет!"},
-                status=status.HTTP_400_BAD_REQUEST,
+                {"detail": "Рецепт удален из списка."},
+                status=status.HTTP_204_NO_CONTENT,
             )
-        instance.delete()
         return Response(
-            {"detail": "Рецепт удален из списка."},
-            status=status.HTTP_204_NO_CONTENT,
+            {"error": "Такого рецепта в списке нет!"},
+            status=status.HTTP_400_BAD_REQUEST,
         )

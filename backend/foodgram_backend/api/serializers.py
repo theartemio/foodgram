@@ -1,9 +1,10 @@
 from django.db import transaction
+from drf_extra_fields.fields import Base64ImageField
+from rest_framework import serializers
+
 from foodgram_backend.constants import MAX_NAMES_LENGTH
-from foodgram_backend.fields import Base64ImageField
 from foodgram_backend.utils import is_in_list
 from recipes.models import Ingredient, Recipe, RecipeIngredient, Tag
-from rest_framework import serializers
 from userlists.models import Favorites, ShoppingCart
 from users.serializers import CustomUserSerializer
 
@@ -76,7 +77,7 @@ class RecipeAddingSerializer(serializers.ModelSerializer):
     tags = serializers.PrimaryKeyRelatedField(
         queryset=Tag.objects.all(), many=True, required=True, allow_empty=False
     )
-    image = Base64ImageField(required=True, allow_null=True)
+    image = Base64ImageField(required=True)
     author = serializers.SlugRelatedField(
         slug_field="username", read_only=True
     )
@@ -96,6 +97,11 @@ class RecipeAddingSerializer(serializers.ModelSerializer):
         )
         read_only_fields = ("author",)
 
+    def validate(self, data):
+        if not data["image"]:
+            raise serializers.ValidationError("Картинка обязательна!")
+        return data
+
     def validate_tags(self, value):
         unique_tags = set(value)
         if len(value) != len(unique_tags):
@@ -104,6 +110,8 @@ class RecipeAddingSerializer(serializers.ModelSerializer):
 
     def add_ingredients(self, recipe, ingredients_data):
         """Описывает логику добавления ингредиентов к рецепту."""
+
+        recipe_ingredients = []
         added_ingredient_ids = set()
         for ingredient in ingredients_data:
             ingredient_id = ingredient["ingredient_id"]["id"]
@@ -112,12 +120,12 @@ class RecipeAddingSerializer(serializers.ModelSerializer):
                     f"Ингредиент с ID {ingredient_id} повторяется."
                 )
             amount = ingredient["amount"]
-            added_ingredient_ids.add(ingredient_id)
-            RecipeIngredient.objects.update_or_create(  # Применить Bulk create
-                recipe=recipe,
-                ingredient_id=ingredient_id,
-                defaults={"amount": amount},
+            recipe_ingredient = RecipeIngredient(
+                recipe=recipe, ingredient_id=ingredient_id, amount=amount
             )
+            recipe_ingredients.append(recipe_ingredient)
+            added_ingredient_ids.add(ingredient_id)
+        RecipeIngredient.objects.bulk_create(recipe_ingredients)
 
     @transaction.atomic
     def create(self, validated_data):
@@ -137,6 +145,7 @@ class RecipeAddingSerializer(serializers.ModelSerializer):
         for attr, value in validated_data.items():
             setattr(instance, attr, value)
         if ingredients is not None:
+            RecipeIngredient.objects.filter(recipe=instance).delete()
             self.add_ingredients(instance, ingredients)
         if tags is not None:
             instance.tags.set(tags)

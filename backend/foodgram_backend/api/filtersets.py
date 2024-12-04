@@ -1,7 +1,7 @@
 from django.db.models import Exists, OuterRef
 from django_filters import rest_framework as filters
-from recipes.models import Recipe
-from userlists.models import Favorites, ShoppingCart
+
+from recipes.models import Recipe, Tag
 
 
 class RecipeFilter(filters.FilterSet):
@@ -21,7 +21,11 @@ class RecipeFilter(filters.FilterSet):
     is_in_shopping_cart = filters.BooleanFilter(
         method="filter_is_in_shopping_cart"
     )
-    tags = filters.CharFilter(method="filter_tags", lookup_expr="iexact")
+    tags = filters.ModelMultipleChoiceFilter(
+        field_name="tags__slug",
+        to_field_name="slug",
+        queryset=Tag.objects.all(),
+    )
 
     class Meta:
         model = Recipe
@@ -35,10 +39,9 @@ class RecipeFilter(filters.FilterSet):
         user = self.request.user
         if not user.is_authenticated:
             return queryset.none() if value else queryset
-
         return queryset.annotate(
             is_favorited=Exists(
-                Favorites.objects.filter(user=user, recipe=OuterRef("pk"))
+                user.userlists_favorites_owner.filter(recipe=OuterRef("pk"))
             )
         ).filter(is_favorited=value)
 
@@ -52,15 +55,6 @@ class RecipeFilter(filters.FilterSet):
             return queryset.none() if value else queryset
         return queryset.annotate(
             is_in_shopping_cart=Exists(
-                ShoppingCart.objects.filter(user=user, recipe=OuterRef("pk"))
+                user.userlists_shoppingcart_owner.filter(recipe=OuterRef("pk"))
             )
         ).filter(is_in_shopping_cart=value)
-
-    def filter_tags(self, queryset, name, value):
-        """
-        Фильтрует рецепты по тегам.
-        """
-        tags = self.request.query_params.getlist("tags")
-        if tags:
-            return queryset.filter(tags__slug__in=tags).distinct()
-        return queryset

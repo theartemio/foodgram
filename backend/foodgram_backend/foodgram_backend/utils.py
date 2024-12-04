@@ -15,12 +15,10 @@ def get_ingredients_with_amounts(recipe_id):
     и их количеств.
     Принимает id рецепта.
     """
-    recipe_ingredients = RecipeIngredient.objects.filter(recipe_id=recipe_id)
-    ingredients = []
-    for recipe_ingredient in recipe_ingredients:
-        ingredient = recipe_ingredient.ingredient
-        amount = recipe_ingredient.amount
-        ingredients.append({"id": ingredient.id, "amount": amount})
+    recipe_ingredients = RecipeIngredient.objects.filter(
+        recipe_id=recipe_id
+    ).values("ingredient__id", "amount")
+    ingredients = list(recipe_ingredients)
     return ingredients
 
 
@@ -56,7 +54,7 @@ def upgrade_ingredient_list(ingredients, user, model, adding=True):
     """
 
     for ingredient in ingredients:
-        ingredient_id = ingredient["id"]
+        ingredient_id = ingredient["ingredient__id"]
         ingredient_amount = (
             ingredient["amount"] if adding else (-ingredient["amount"])
         )
@@ -81,14 +79,16 @@ def upgrade_ingredient_list(ingredients, user, model, adding=True):
 
 def form_shopping_list(user):
     """Формирует список покупок для отправки в файле."""
-    users_ingredients = UserIngredients.objects.filter(user=user.id)
+    users_ingredients = UserIngredients.objects.filter(user=user.id).values(
+        "ingredient__name", "ingredient__measurement_unit", "total"
+    )
     ingredient_lines = [
         f"Список покупок пользователя {user}",
     ]
     for ingredient in users_ingredients:
-        name = ingredient.ingredient.name
-        unit = ingredient.ingredient.measurement_unit
-        total = ingredient.total
+        name = ingredient["ingredient__name"]
+        unit = ingredient["ingredient__measurement_unit"]
+        total = ingredient["total"]
         line = f"{name}, ({unit}) - {total}"
         ingredient_lines.append(line)
     response_data = "\n".join(ingredient_lines)
