@@ -36,7 +36,6 @@ INSTALLED_APPS = [
     "django_filters",
     "api.apps.ApiConfig",
     "drf_extra_fields",
-    "psycopg2-binary",
     "users.apps.UsersConfig",
     "recipes.apps.RecipesConfig",
     "userlists.apps.UserlistsConfig",
