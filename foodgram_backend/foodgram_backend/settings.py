@@ -87,6 +87,8 @@ DJOSER = {
 WSGI_APPLICATION = "foodgram_backend.wsgi.application"
 
 # Databases
+
+
 DATABASES = {
     "default": {
         "ENGINE": "django.db.backends.postgresql",
@@ -97,14 +99,15 @@ DATABASES = {
         "PORT": os.getenv("DB_PORT", 5432),
     }
 }
-"""
-DATABASES = {
+
+
+"""DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.sqlite3',
         'NAME': BASE_DIR / 'db.sqlite3',
     }
-}
-"""
+}"""
+
 
 # User model settings
 AUTH_USER_MODEL = "users.CustomUser"
@@ -172,6 +175,6 @@ REST_FRAMEWORK = {
     "DEFAULT_PERMISSION_CLASSES": [
         "rest_framework.permissions.IsAuthenticated",
     ],
-    "DEFAULT_PAGINATION_CLASS": "rest_framework.pagination.LimitOffsetPagination",
-    "PAGE_SIZE": 5,
+    "DEFAULT_PAGINATION_CLASS": "api.pagination.RecipesPageNumberPageSizePagination",
+    "PAGE_SIZE": 6,
 }

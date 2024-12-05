@@ -1,9 +1,10 @@
 from django.db import transaction
 from drf_extra_fields.fields import Base64ImageField
+from rest_framework import serializers
+
 from foodgram_backend.constants import MAX_NAMES_LENGTH
 from foodgram_backend.utils import is_in_list
 from recipes.models import Ingredient, Recipe, RecipeIngredient, Tag
-from rest_framework import serializers
 from userlists.models import Favorites, ShoppingCart
 from users.serializers import CustomUserSerializer
 

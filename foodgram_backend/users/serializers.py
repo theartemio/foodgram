@@ -1,9 +1,10 @@
 from django.contrib.auth import get_user_model
 from djoser.serializers import UserCreateSerializer, UserSerializer
 from drf_extra_fields.fields import Base64ImageField
+from rest_framework import serializers
+
 from foodgram_backend.utils import get_image_url
 from recipes.serializers import RecipeSubscriptionsSerializer
-from rest_framework import serializers
 
 from .mixins import ValidateUsernameMixin
 from .models import Follow

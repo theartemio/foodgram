@@ -39,4 +39,4 @@ CHOICES = (
 )
 
 # Domain for shortened links
-DOMAIN = "https://superfoodgram3000.ddns.net/recipe/"
+DOMAIN = "https://superfoodgram3000.ddns.net/recipes/"

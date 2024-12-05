@@ -1,7 +1,8 @@
 import re
 
-from foodgram_backend.constants import USERNAME_PATTERN
 from rest_framework import serializers
+
+from foodgram_backend.constants import USERNAME_PATTERN
 
 
 class ValidateUsernameMixin:
