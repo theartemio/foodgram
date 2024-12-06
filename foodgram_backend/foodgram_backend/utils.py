@@ -1,5 +1,5 @@
 from recipes.models import RecipeIngredient
-from userlists.models import UserIngredients
+from userlists.models import ShoppingCart
 
 
 def get_image_url(instance):
@@ -41,55 +41,38 @@ def is_in_list(user, model, object):
     return in_list
 
 
-def upgrade_ingredient_list(ingredients, user, model, adding=True):
-    """
-    Функция для обновления списка ингредиентов.
-    Принимает в качестве параметров:
-        - список из словарей, содержащих ингредиенты и их
-        количества,
-        - юзера
-        - модель, в которой хранятся ингредиенты пользователя
-        - булево значение adding, указывающее на то,
-        добавляет ли пользователь рецепт к списку, или удаляет.
-    """
-
-    for ingredient in ingredients:
-        ingredient_id = ingredient["ingredient__id"]
-        ingredient_amount = (
-            ingredient["amount"] if adding else (-ingredient["amount"])
-        )
-        ingredient_in_list = model.objects.filter(
-            ingredient_id=ingredient_id
-        ).first()
-        if ingredient_in_list:
-            current_total = ingredient_in_list.total
-            updated_total = current_total + ingredient_amount
-            if updated_total == 0:
-                model.objects.get(ingredient_id=ingredient_id).delete()
-            else:
-                ingredient_in_list.total = updated_total
-                ingredient_in_list.save()
-        else:
-            model.objects.create(
-                user=user,
-                ingredient_id=ingredient_id,
-                total=ingredient_amount,
-            )
-
-
-def form_shopping_list(user):
-    """Формирует список покупок для отправки в файле."""
-    users_ingredients = UserIngredients.objects.filter(user=user.id).values(
-        "ingredient__name", "ingredient__measurement_unit", "total"
+def form_calculated_cart(user):
+    """Формирует список ингредиентов из списка покупок пользователя."""
+    calculated_cart = {}
+    recipes_in_cart = ShoppingCart.objects.filter(user=user).values_list(
+        "recipe", flat=True
     )
+    recipe_ingredients = RecipeIngredient.objects.filter(
+        recipe__in=recipes_in_cart
+    ).select_related("ingredient")
+    for recipe_ingredient in recipe_ingredients:
+        ingredient = recipe_ingredient.ingredient
+        amount = recipe_ingredient.amount
+        name = ingredient.name
+        if name in calculated_cart.keys():
+            calculated_cart[name]["total"] += amount
+        else:
+            calculated_cart[name] = {
+                "total": amount,
+                "unit": ingredient.measurement_unit,
+            }
+    return calculated_cart
+
+
+def generate_list(shopping_cart, user=""):
+    """Формирует список покупок для отправки в файле."""
     ingredient_lines = [
         f"Список покупок пользователя {user}",
     ]
-    for ingredient in users_ingredients:
-        name = ingredient["ingredient__name"]
-        unit = ingredient["ingredient__measurement_unit"]
-        total = ingredient["total"]
-        line = f"{name}, ({unit}) - {total}"
+    for ingredient_name in shopping_cart.keys():
+        unit = shopping_cart[ingredient_name]["unit"]
+        total = shopping_cart[ingredient_name]["total"]
+        line = f"{ingredient_name}, ({unit}) - {total}"
         ingredient_lines.append(line)
     response_data = "\n".join(ingredient_lines)
     return response_data

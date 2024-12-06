@@ -9,7 +9,7 @@ from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
 
 from foodgram_backend.constants import DOMAIN
-from foodgram_backend.utils import form_shopping_list
+from foodgram_backend.utils import form_calculated_cart, generate_list
 from recipes.models import Ingredient, Recipe, ShortenedLinks, Tag
 from userlists.models import Favorites, ShoppingCart
 from users.permissions import IsAuthorOrReadOnly
@@ -156,10 +156,11 @@ class RecipeViewSet(
     def download_shopping_cart(self, request):
         """Возвращает список покупок в виде списка в формате txt."""
         user = self.request.user
-        response_file = form_shopping_list(user)
+        cart = form_calculated_cart(user)
+        shopping_list = generate_list(cart, user=user.username)
         response = FileResponse(
-            response_file,
+            shopping_list,
             as_attachment=True,
-            filename=f"{user}_shopping_list.txt"
+            filename=f"{user.username}_shopping_list.txt"
         )
         return response
