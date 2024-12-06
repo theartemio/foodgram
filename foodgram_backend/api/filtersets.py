@@ -1,7 +1,24 @@
 from django.db.models import Exists, OuterRef
 from django_filters import rest_framework as filters
 
-from recipes.models import Recipe, Tag
+from recipes.models import Ingredient, Recipe, Tag
+
+
+class NameStartsWithFilter(filters.FilterSet):
+
+    class Meta:
+        model = Ingredient
+        fields = {
+            "name": [
+                "startswith", "exact"
+            ],
+        }
+        search_fields = ("name",)
+        filter_overrides = {
+            "name": {
+                "lookup_type": "startswith"
+            }
+        }
 
 
 class RecipeFilter(filters.FilterSet):

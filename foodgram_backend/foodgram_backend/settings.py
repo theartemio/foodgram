@@ -87,8 +87,6 @@ DJOSER = {
 WSGI_APPLICATION = "foodgram_backend.wsgi.application"
 
 # Databases
-
-
 DATABASES = {
     "default": {
         "ENGINE": "django.db.backends.postgresql",
@@ -177,4 +175,5 @@ REST_FRAMEWORK = {
     ],
     "DEFAULT_PAGINATION_CLASS": "api.pagination.RecipesPageNumberPageSizePagination",
     "PAGE_SIZE": 6,
+    "SEARCH_PARAM": "name"
 }

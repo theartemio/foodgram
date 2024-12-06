@@ -15,11 +15,11 @@ from userlists.models import Favorites, ShoppingCart
 from users.permissions import IsAuthorOrReadOnly
 
 from .filtersets import RecipeFilter
-from .mixins import NoPaginationMixin, SearchMixin
 from .serializers import (FavoritesSerializer, IngredientSerializer,
                           RecipeAddingSerializer, RecipeDetailSerializer,
                           ShoppingCartSerializer, TagSerializer)
-from .viewset_mixins import ManageUserListsViewSet
+from .viewset_mixins import (ManageUserListsViewSet, NoPaginationMixin,
+                             SearchMixin)
 
 
 # Вьюсеты для простых моделей
@@ -122,7 +122,6 @@ class RecipeViewSet(
 
     def partial_update(self, request, *args, **kwargs):
         """Разрешает PATCH запросы только при передаче полных данных."""
-        kwargs.pop("partial", False)
         instance = self.get_object()
         serializer = self.get_serializer(
             instance, data=request.data, partial=False

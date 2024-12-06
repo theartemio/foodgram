@@ -1,10 +1,23 @@
 from django.shortcuts import get_object_or_404
-from rest_framework import status, viewsets
+from rest_framework import filters, status, viewsets
 from rest_framework.mixins import CreateModelMixin
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 
 from recipes.models import Recipe
+
+
+class SearchMixin:
+    """Миксин для настройки поиска по названию."""
+
+    filter_backends = (filters.SearchFilter,)
+    search_fields = ("^name",)
+
+
+class NoPaginationMixin:
+    """Миксин отключения пагинации."""
+
+    pagination_class = None
 
 
 class ManageUserListsViewSet(

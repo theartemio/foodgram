@@ -77,7 +77,7 @@ class RecipeAddingSerializer(serializers.ModelSerializer):
     tags = serializers.PrimaryKeyRelatedField(
         queryset=Tag.objects.all(), many=True, required=True, allow_empty=False
     )
-    image = Base64ImageField(required=True)
+    image = Base64ImageField(required=False)
     author = serializers.SlugRelatedField(
         slug_field="username", read_only=True
     )
@@ -98,7 +98,7 @@ class RecipeAddingSerializer(serializers.ModelSerializer):
         read_only_fields = ("author",)
 
     def validate(self, data):
-        if not data["image"]:
+        if self.context["request"].method == "POST" and "image" not in data:
             raise serializers.ValidationError("Картинка обязательна!")
         return data
 
