@@ -160,6 +160,7 @@ class RecipeViewSet(
         shopping_list = generate_list(cart, user=user.username)
         response = FileResponse(
             shopping_list,
+            content_type="text.txt; charset=utf-8",
             as_attachment=True,
             filename=f"{user.username}_shopping_list.txt"
         )

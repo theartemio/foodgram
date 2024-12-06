@@ -1,4 +1,3 @@
-from django.contrib.auth import get_user_model
 from django.http import Http404
 from django.shortcuts import get_object_or_404
 from djoser.views import UserViewSet
@@ -9,12 +8,12 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
+from recipes.models import User
+
 from .models import CustomUser, Follow
 from .permissions import IsSameUserOrRestricted
 from .serializers import (AvatarSerializer, FollowSerializer,
                           SubscriptionsUsersSerializer)
-
-User = get_user_model()
 
 
 class CustomUserViewSet(UserViewSet):

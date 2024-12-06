@@ -1,4 +1,3 @@
-from django.db.models import Exists, OuterRef
 from django_filters import rest_framework as filters
 
 from recipes.models import Ingredient, Recipe, Tag
@@ -9,16 +8,10 @@ class NameStartsWithFilter(filters.FilterSet):
     class Meta:
         model = Ingredient
         fields = {
-            "name": [
-                "startswith", "exact"
-            ],
+            "name": ["startswith", "exact"],
         }
         search_fields = ("name",)
-        filter_overrides = {
-            "name": {
-                "lookup_type": "startswith"
-            }
-        }
+        filter_overrides = {"name": {"lookup_type": "startswith"}}
 
 
 class RecipeFilter(filters.FilterSet):
@@ -56,11 +49,8 @@ class RecipeFilter(filters.FilterSet):
         user = self.request.user
         if not user.is_authenticated:
             return queryset.none() if value else queryset
-        return queryset.annotate(
-            is_favorited=Exists(
-                user.userlists_favorites_owner.filter(recipe=OuterRef("pk"))
-            )
-        ).filter(is_favorited=value)
+        if value:
+            return queryset.filter(userlists_favorites_list__user=user)
 
     def filter_is_in_shopping_cart(self, queryset, name, value):
         """
@@ -70,8 +60,5 @@ class RecipeFilter(filters.FilterSet):
         user = self.request.user
         if not user.is_authenticated:
             return queryset.none() if value else queryset
-        return queryset.annotate(
-            is_in_shopping_cart=Exists(
-                user.userlists_shoppingcart_owner.filter(recipe=OuterRef("pk"))
-            )
-        ).filter(is_in_shopping_cart=value)
+        if value:
+            return queryset.filter(userlists_shoppingcart_list__user=user)
